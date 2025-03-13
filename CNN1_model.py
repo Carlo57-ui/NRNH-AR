@@ -6,14 +6,14 @@ import torch.nn as nn
 class CNN1(nn.Module):
     def __init__(self):
         super(CNN1, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)   
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)   
         self.relu1 = nn.ReLU()
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=2, stride=1, padding=1)
         self.relu2 = nn.ReLU()
         self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(64 * 27 * 27, 120)
+        self.fc1 = nn.Linear(64* 38 * 38, 120)
         self.relu3 = nn.ReLU()
         self.fc2 = nn.Linear(120, 2)
         self.softmax = nn.Softmax(dim=1)
@@ -30,6 +30,7 @@ class CNN1(nn.Module):
         x = self.relu3(x)
         x = self.fc2(x)
         x = self.softmax(x)
+        
         return x
 
 modelo = CNN1()
