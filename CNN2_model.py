@@ -5,7 +5,7 @@ import torch.nn as nn
 
 class CNN2(nn.Module):
     def __init__(self):
-        super(CNN, self).__init__()
+        super(CNN2, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)   
         self.relu1 = nn.ReLU()
         self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -32,4 +32,5 @@ class CNN2(nn.Module):
         x = self.softmax(x)
         return x
 
+modelo = CNN2()
 
