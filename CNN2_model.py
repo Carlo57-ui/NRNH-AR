@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-class CNN(nn.Module):
+class CNN2(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)   
@@ -33,4 +33,3 @@ class CNN(nn.Module):
         return x
 
 
-modelo = CNN()
