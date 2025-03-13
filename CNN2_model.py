@@ -33,4 +33,3 @@ class CNN2(nn.Module):
         return x
 
 modelo = CNN2()
-
