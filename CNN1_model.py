@@ -32,4 +32,4 @@ class CNN1(nn.Module):
         x = self.softmax(x)
         return x
 
-
+modelo = CNN1()
