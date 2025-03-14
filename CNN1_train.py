@@ -7,8 +7,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
-from CNN1_model import CNN1  # Importa el modelo desde CNN1_model.py
+from CNN_model import CNN                        # Importa el modelo desde CNN_model.py
 
+categories = 2
 # Define el dispositivo a utilizar (CPU o GPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,7 +26,7 @@ train_dataset = ImageFolder("./Data CNN1", transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
 # Crea la instancia del modelo y la mueve al dispositivo
-model = CNN1().to(device)
+model = CNN(categories).to(device)
 
 # Define la función de pérdida y el optimizador
 criterion = nn.CrossEntropyLoss()
