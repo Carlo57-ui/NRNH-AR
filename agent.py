@@ -32,14 +32,7 @@ class Entorno:
     def step(self,action):
         #que realice la acción
         next_state = random.randit(0,1)  #Cc~ con el sensor o bien las fotos concatenadas
-        return next_state
-    
-    def configurar_botones(self):
-        GPIO.setup(self.boton_0, GPIO.IN)
-        GPIO.setup(self.boton_1, GPIO.IN)
-        GPIO.setup(self.boton_2, GPIO.IN)
-        GPIO.setup(self.boton_c8, GPIO.IN)
-        
+        return next_state        
 
     def encender_led(self, accion):
         leds = [self.led_1, self.led_2, self.led_3, self.led_4, self.led_5, self.led_6, self.led_7, self.led_8, self.led_9]
