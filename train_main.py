@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from agent import Entorno
 from CNN1_inf import CNN1_inf as CNN1
 from CNN2_inf import CNN2_inf as CNN2
+from Buffer import ReplayBuffer
+
 # Parameters
 num_episodes = 500
 max_number_of_steps = 30
@@ -16,7 +18,8 @@ learning_rate = 0.001         # Learning rate
 tau = 0.05                    # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 32
-replay_memory_size = 10000
+buffer_size = 10000
+
 
 input_size = 1
 output_size = 2
@@ -48,11 +51,19 @@ recompensa_global = 0
 
 # Load the model if it exists
 try:
-  Real_actor.load_state_dict(torch.load('weights.pth', weights_only=True))
+  Predi_actor.load_state_dict(torch.load('weights.pth', weights_only=True))
   print("Model loaded successfully.")
 except FileNotFoundError:   
   print("Model not found.")
   
+# Load the buffer if it exists
+try:
+  Buff = ReplayBuffer.load()
+  print("Buffer successfully.")
+except FileNotFoundError:   
+  Buff = ReplayBuffer(buffer_size)
+  print("Buffer not found.")
+
 
 
 
@@ -86,21 +97,59 @@ for episode in range(num_episodes):
     for step in range(max_number_of_steps):
         action = get_action(state, episode)
         img = take_pictures()
-        observation = CNN1(img)                        
+        #observation = CNN1(img) 
+        observation = CNN1('./Data CNN1/No target/10.jpg') 
+        observation = observation.predicted_class      #It can be 1 or 0                  
 
         if observation == 1:
             terminated = True                           # It has found the object
-        else:
-            Cc = CNN2(img)
-
-        next_state, reward, terminated, truncated = env.step(action)
-        episode_reward = episode_reward + reward
-        update_Q(state, action, reward, next_state, done)
-        state = next_state
-        
-        if done:
             break
+        else:
+            #Cc = CNN2(img)
+            Cc = CNN2('./Data CNN2/010/10.jpg')
+            Cc = Cc.predicted_class                     # It can be 1-4
+
+            ap = Real_actor.forward(Cc)                 # Predicted action
+            ar = random.randint(2,3)                    # Real action, random  (2:turn left, 3:turn right)
+
+            qr = Real_critic1.forward(Cc, ar)           # Real Q
+            qp = Predi_critic1.forward(Cc, ap)          # Predicted Q
+           
+            next_state = env.step(action)               # Do the action
+            if next_state == 0:
+                next_state = 0
+            else:
+                img = take_pictures()
+                next_state = CNN1('./Data CNN1/No target/10.jpg') 
+                next_state = next_state.predicted_class      #It can be 1 or 0                  
+
+                if next_state == 1:
+                    terminated = True                           # It has found the object
+                    break
+                else:
+                    #next_state = CNN2(img)
+                    next_state = CNN2('./Data CNN2/010/10.jpg')
+                    next_state = next_state.predicted_class                     # It can be 1-4
+
+            Buff.append((Cc,ar,next_state))
+            Buff.save()
+
+            if Buff.size() >= batch_size:
+                Cc,ar,next_stat = Buff.sample(batch_size, device)
+
+            # Optimize the model
+            with torch.no_grad():
+                val_qp = qp(Cc, ap).detach().max(1)[0]
+                val_qr = qp(Cc, ar).detach().max(1)[0]
+                loss = F.mse_loss(val_t.float(), val_qp.float())
+
+                opt_critico1.zero_grad()
+                opt_critico2.zero_grad()
+                loss.backward()
+                opt_critico1.step()
+                opt_critico2.step()
+            
 
     print('Episodio:', episode, 'Recompensa:', episode_reward)
     # Save the weights after each episode
-    torch.save(policy_net.state_dict(), 'pesosQ.pth')
+    torch.save(Predi_actor.state_dict(), 'weights.pth')

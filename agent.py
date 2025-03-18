@@ -29,6 +29,11 @@ class Entorno:
         state = random.randit(0,1)
         return state
 
+    def step(self,action):
+        #que realice la acción
+        next_state = random.randit(0,1)  #Cc~ con el sensor o bien las fotos concatenadas
+        return next_state
+    
     def configurar_botones(self):
         GPIO.setup(self.boton_0, GPIO.IN)
         GPIO.setup(self.boton_1, GPIO.IN)
