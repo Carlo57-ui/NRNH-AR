@@ -39,8 +39,8 @@ class CNN1_inf:
             # Define los nombres de las clases
             class_names = [0, 1]  #0: No target 1: Target
             # Obtiene el nombre de la clase
-            predicted_class_name = class_names[predicted_class.item()]
+            self.predicted_class = class_names[predicted_class.item()]
             # Imprime la clase predicha
-            print(f'Predicted class: {predicted_class_name}')
+            #print(f'Predicted class: {self.predicted_class}')
 
             
