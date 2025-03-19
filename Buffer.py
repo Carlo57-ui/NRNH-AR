@@ -35,7 +35,9 @@ class ReplayBuffer:
         return res[0], res[1], res[2]
     
     def save(self):
-        np.save('replay_buffer.npy', np.array(self.buffer))
+        
+        self.buffer = [np.array(item) for item in self.buffer]
+        #np.save('replay_buffer.npy', np.array(self.buffer))
 
     def load(self):
-        self.buffer = np.load('replay_buffer.npy').tolist() 
+        self.buffer = np.load('replay_buffer.npy', allow_pickle=True).tolist()

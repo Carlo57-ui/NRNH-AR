@@ -29,7 +29,7 @@ class Critica(nn.Module):
 
 
   def forward(self, x, y):
-      concatena = torch.cat([x, y.repeat(2, 1)], dim=1)   
+      concatena = torch.cat([x, torch.tensor(y).repeat(1, 2)], dim=1)   
       Q = self.relu(self.fc1(concatena))
       Q = self.relu(self.fc2(Q))
       Q = F.sigmoid(self.fc3(Q))

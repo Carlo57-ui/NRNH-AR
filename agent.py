@@ -1,5 +1,6 @@
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
+import random
 
 class Entorno:
     def __init__(self):
@@ -20,24 +21,17 @@ class Entorno:
         self.boton_c8 = 26
         
 
-        GPIO.setmode(GPIO.BOARD)
+        #GPIO.setmode(GPIO.BOARD)
 
-        self.configurar_leds()
-        self.configurar_botones()
+
 
     def reset(self): # Ultrasonic sensor signal
-        state = random.randit(0,1)
+        state = random.randint(0,1)
         return state
 
     def step(self,action):
         #que realice la acción
-        next_state = random.randit(0,1)  #Cc~ con el sensor o bien las fotos concatenadas
+        next_state = random.randint(0,1)  #Cc~ con el sensor o bien las fotos concatenadas
         return next_state        
 
-    def encender_led(self, accion):
-        leds = [self.led_1, self.led_2, self.led_3, self.led_4, self.led_5, self.led_6, self.led_7, self.led_8, self.led_9]
-        for led in leds:  #Apaga todos los leds
-            GPIO.output(led, False)
-        accion = accion - 1
-        if 1 <= accion <= 9: #prende la del caso
-            GPIO.output(leds[accion], True)
+ 

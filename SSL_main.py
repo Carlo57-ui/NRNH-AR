@@ -17,7 +17,7 @@ gamma = 0.999                 # Discount factor
 learning_rate = 0.001         # Learning rate
 tau = 0.05                    # Smoothing factor
 policy_delay = 2              # Delay in policy update
-batch_size = 32
+batch_size = 1
 buffer_size = 10000
 
 
@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 #Networks
 Real_actor = Actor(input_size, output_size).to(device)
-Real_critic1 = Critica(input_size, output_size.to(device))
+Real_critic1 = Critica(input_size, output_size).to(device)
 Real_critic2 = Critica(input_size, output_size).to(device)
 
 
@@ -36,7 +36,7 @@ Predi_actor = Actor(input_size, output_size).to(device)
 Predi_actor.load_state_dict(Real_actor.state_dict())      # Copy weights from the original
 
 Predi_critic1 = Critica(input_size, output_size).to(device)
-Predi_critic1.load_state_dict(Real_actor.state_dict())
+Predi_critic1.load_state_dict(Real_critic1.state_dict())
 
 Predi_critic2 = Critica(input_size, output_size).to(device)
 Predi_critic2.load_state_dict(Real_critic2.state_dict())
@@ -58,7 +58,7 @@ except FileNotFoundError:
   
 # Load the buffer if it exists
 try:
-  Buff = ReplayBuffer.load()
+  Buff = ReplayBuffer.load(buffer_size)
   print("Buffer successfully.")
 except FileNotFoundError:   
   Buff = ReplayBuffer(buffer_size)
@@ -108,12 +108,15 @@ for episode in range(num_episodes):
             #Cc = CNN2(img)
             Cc = CNN2('./Data CNN2/010/10.jpg')
             Cc = Cc.predicted_class                     # It can be 1-4
+            Cc_t = torch.Tensor([Cc]).unsqueeze(1)  # Agrega una nueva dimensión en la posición 1
 
-            ap = Real_actor.forward(Cc)                 # Predicted action
+            ap = Real_actor.forward(Cc_t)                 # Predicted action
             ar = random.randint(2,3)                    # Real action, random  (2:turn left, 3:turn right)
+            ap_t = torch.argmax(ap).item()
+            ar_t = torch.Tensor([ar]).unsqueeze(1)
 
-            qr = Real_critic1.forward(Cc, ar)           # Real Q
-            qp = Predi_critic1.forward(Cc, ap)          # Predicted Q
+            qr = Real_critic1.forward(Cc_t, ar_t)           # Real Q
+            qp = Predi_critic1.forward(Cc_t, ap_t)          # Predicted Q
            
             next_state = env.step(action)               # Do the action
             if next_state == 0:
@@ -135,19 +138,23 @@ for episode in range(num_episodes):
             Buff.save()
 
             if Buff.size() >= batch_size:
-                Cc,ar,next_stat = Buff.sample(batch_size, device)
+                Cc, ar, next_stat = Buff.sample(batch_size, device)
+                Cc_t = torch.Tensor([c.item() for c in Cc]).unsqueeze(1)  # Convierte cada elemento de Cc a escalar
+                ar_t = torch.Tensor([a.item() for a in ar]).unsqueeze(1)  # Convierte cada elemento de ar a escalar
 
-            # Optimize the model
-            with torch.no_grad():
-                val_qp = qp(Cc, ap).detach().max(1)[0]
-                val_qr = qp(Cc, ar).detach().max(1)[0]
-                loss = F.mse_loss(val_t.float(), val_qp.float())
+                ap = Real_actor.forward(Cc_t)                 # Predicted action
+                ap_t = torch.argmax(ap).item()
+
+                val_qp = Predi_critic1.forward(Cc_t, ap_t).detach().max(1)[0]
+                val_qr = Real_critic1.forward(Cc_t, ar_t).detach().max(1)[0]
+                val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
+                val_qr.requires_grad_(True)
+                loss = F.mse_loss(val_qr.float(), val_qp.float())
 
                 opt_critico1.zero_grad()
-                opt_critico2.zero_grad()
                 loss.backward()
                 opt_critico1.step()
-                opt_critico2.step()
+
             
 
     print('Episodio:', episode, 'Recompensa:', episode_reward)
