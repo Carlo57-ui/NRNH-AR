@@ -3,18 +3,18 @@
 int mensaje; 
 
 //motores
-int IN1 = 27;
-int IN2 = 14;
-int IN3 = 12;
-int IN4 = 13;
+int IN1 = 10;
+int IN2 = 9;
+int IN3 = 8;
+int IN4 = 7;
 
 //servos
 Servo s1;
-int servo1 = 19;
+int servo1 = 11;
 
 //VARIABLES DEL SENSOR DE PROXIMIDAD//
-int ECO = 11;       
-int TRIG = 10;      
+int ECO = 12;       
+int TRIG = 13;      
 int DURACION;
 int DISTANCIA;
 
