@@ -13,9 +13,9 @@ from Buffer import ReplayBuffer
 # Parameters
 num_episodes = 5
 max_number_of_steps = 30
-gamma = 0.999                 # Discount factor
+gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
-tau = 0.01                    # Smoothing factor
+tau = 0.1                    # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
@@ -73,6 +73,7 @@ for episode in range(num_episodes):
 
     for step in range(max_number_of_steps):
         action = 4                                  # action 4
+        env.step(action)
         img = env.take_picture()
 
         o1 = CNN1("1.jpg")
@@ -145,7 +146,6 @@ for episode in range(num_episodes):
                 loss = F.mse_loss(val_qr.float(), val_qp.float())
 
                 dif_true = val_qr.float()-val_qp.float()
-                print(dif_true)
 
                 if dif_true < dif_q:
                     llA += 0.1

@@ -4,7 +4,7 @@ import random
 import cv2
 import serial
 
-'''
+
 ser = serial.Serial(
     port = "/dev/ttyACM0",              #Modificar este puerto JETSON -- "/dev/ttyACM0"  Computadora "COM3"
     baudrate = 115200,
@@ -16,7 +16,7 @@ ser = serial.Serial(
     rtscts = False,
     dsrdtr = False,
     write_timeout = 2)
-'''
+
 
 class Entorno:
     def __init__(self):
@@ -27,7 +27,17 @@ class Entorno:
         self.cam = cv2.VideoCapture(0)
 
     def reset(self): # Ultrasonic sensor signal
-        state = random.randint(0,1)
+        ser.write("M".encode())                   #Python wait a message
+        in_sensor = ser.read()
+
+        if in_sensor == b'0':                     #Always put b 
+            #print("No obstacle")
+            state = 0
+        
+        elif in_sensor == b'1':  
+            #print("Obstacle")
+            state = 1
+    
         return state
 
     def concat(self):
@@ -45,14 +55,14 @@ class Entorno:
         for i in [1,2,3]:
             if i == 1:
                 a = 0
-#               ser.write("a".encode())
+                ser.write("a".encode())     # Servo motor 0°
             elif i == 2:
                 a = 0
-#               ser.write("b".encode())
+                ser.write("b".encode())     # Servo motor 90°
             elif i == 3:
                 a = 0
-#               ser.write("c".encode())
-
+                ser.write("c".encode())     # Servo motor 180°
+ 
             ret,frame = self.cam.read()
 
             cv2.imwrite("%d.jpg"%i,frame) 
@@ -61,5 +71,13 @@ class Entorno:
 
     def step(self,action):
         #que realice la acción
-        next_state = random.randint(0,1)  #Cc~ con el sensor o bien las fotos concatenadas
+        if action == 1:                  # Go  (1:go, 2:turn left, 3:turn right, 4:stop)
+            ser.write("d".encode())
+        elif action == 2:                # Turn left
+            ser.write("e".encode())
+        elif action == 3:                # Turn right
+            ser.write("f".encode())
+        elif action == 4:                # Stop   
+            ser.write("g".encode())
+        next_state = self.reset()        # Cc~ con el sensor o bien las fotos concatenadas
         return next_state        

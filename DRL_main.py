@@ -11,14 +11,16 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 500
+num_episodes = 5
 max_number_of_steps = 30
-gamma = 0.999                 # Discount factor
+gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
-tau = 0.05                    # Smoothing factor
+tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
+llA = 1                       # Learning Level A
+dis_t = 0.01                  # Discount time of reward
 
 
 input_size = 1
@@ -27,24 +29,20 @@ output_size = 2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 #Networks
-Real_actor = Actor(input_size, output_size).to(device)
-Real_critic1 = Critica(input_size, output_size).to(device)
-Real_critic2 = Critica(input_size, output_size).to(device)
-
-
 Predi_actor = Actor(input_size, output_size).to(device)
-Predi_actor.load_state_dict(Real_actor.state_dict())      # Copy weights from the original
-
 Predi_critic1 = Critica(input_size, output_size).to(device)
-Predi_critic1.load_state_dict(Real_critic1.state_dict())
 
-Predi_critic2 = Critica(input_size, output_size).to(device)
-Predi_critic2.load_state_dict(Real_critic2.state_dict())
+
+Real_actor = Actor(input_size, output_size).to(device)          
+Real_actor.load_state_dict(Predi_actor.state_dict()) 
+Real_critic1 = Critica(input_size, output_size).to(device)
+Real_critic1.load_state_dict(Predi_critic1.state_dict())
+
+
 
 # Optimizers
-opt_actor = optim.Adam(Real_actor.parameters(), lr=learning_rate)
-opt_critico1 = optim.Adam(Real_critic1.parameters(), lr=learning_rate)
-opt_critico2 = optim.Adam(Real_critic2.parameters(), lr=learning_rate)
+opt_actor = optim.Adam(Predi_actor.parameters(), lr=learning_rate)
+opt_critico1 = optim.Adam(Predi_critic1.parameters(), lr=learning_rate)
 
 # Initialize the global reward
 recompensa_global = 0
@@ -64,22 +62,9 @@ except FileNotFoundError:
   Buff = ReplayBuffer(buffer_size)
   print("Buffer not found.")
 
-
-
-
-def take_pictures():
-    img = './Data CNN1/No target/10.jpg' #código para tomar 3 fotos y concatenarlas
-
-    return img
-
-
-def get_action(state, episode):
-    
-    if state == 0:
-        return random.randint(1,4)     # random action (1:go, 2:turn left, 3:turn right, 4:stop)
-    else:
-        return 4                       # action 4
-        
+def reward(step):
+    r = 1 - dis_t * step 
+    return r
 
 # Create an object of the Environment class
 env = Entorno()
@@ -87,51 +72,71 @@ env = Entorno()
 
 # Bucle de entrenamiento
 for episode in range(num_episodes):
-    state = env.reset()                                 # Ultrasonic sensor signal
-    episode_reward = 0
-
+    state = env.reset()                             # Ultrasonic sensor signal (0,1)
+    
     while state == 0:
-        action = get_action(state, episode)
+        action = random.randint(1,4)                # random action (1:go, 2:turn left, 3:turn right, 4:stop)
         state = env.reset()
 
     for step in range(max_number_of_steps):
-        action = get_action(state, episode)
-        img = take_pictures()
-        #observation = CNN1(img) 
-        observation = CNN1('./Data CNN1/No target/10.jpg') 
-        observation = observation.predicted_class      #It can be 1 or 0                  
+        action = 4                                  # action 4
+        env.step(action)
+        img = env.take_picture()
 
-        if observation == 1:
+        o1 = CNN1("1.jpg")
+        o2 = CNN1("2.jpg")
+        o3 = CNN1("3.jpg")
+        
+        o1 = o1.predicted_class      #It can be 0 or 1 (target or no target)
+        o2 = o2.predicted_class      #It can be 0 or 1                  
+        o3 = o3.predicted_class      #It can be 0 or 1                  
+           
+
+        if o1 == 0 or o2 == 0 or o3 == 0:
             terminated = True                           # It has found the object
             break
         else:
-            #Cc = CNN2(img)
-            Cc = CNN2('./Data CNN2/010/10.jpg')
-            Cc = Cc.predicted_class                     # It can be 1-4
-            Cc_t = torch.Tensor([Cc]).unsqueeze(1)  # Agrega una nueva dimensión en la posición 1
+            img_Cc = env.concat()                   #3 images concatenated
+            
+            Cc = CNN2("cat.jpg")                       # concatenated image in CNN2
+            Cc = Cc.predicted_class                    # It can be 1-4
+            Cc_t = torch.Tensor([Cc]).unsqueeze(1)     # Agrega una nueva dimensión en la posición 1
 
-            ap = Real_actor.forward(Cc_t)                 # Predicted action
-            ar = random.randint(2,3)                    # Real action, random  (2:turn left, 3:turn right)
+            Cc, ar, next_stat = Buff.sample(batch_size, device)            # From buffer
+            next_stat_t = torch.Tensor([n.item() for n in next_stat]).unsqueeze(1)
+
+            ap = Predi_actor.forward(Cc_t)             # Predicted action
+            ar = Real_actor.forward(next_stat_t)       # Real action with next_stat_t (C ̃_c)
             ap_t = torch.argmax(ap).item()
-            ar_t = torch.Tensor([ar]).unsqueeze(1)
+            ar_t = torch.argmax(ar).item()
 
-            qr = Real_critic1.forward(Cc_t, ar_t)           # Real Q
-            qp = Predi_critic1.forward(Cc_t, ap_t)          # Predicted Q
+            qr = Real_critic1.forward(next_stat_t, ar_t)      # Real Q with next_stat_t (C ̃_c)
+            qp = Predi_critic1.forward(Cc_t, ap_t)            # Predicted Q
            
-            next_state = env.step(action)               # Do the action
+            next_state = env.step(ar)              # Do the action
+
             if next_state == 0:
                 next_state = 0
             else:
-                img = take_pictures()
-                next_state = CNN1('./Data CNN1/No target/10.jpg') 
-                next_state = next_state.predicted_class      #It can be 1 or 0                  
+                img = env.take_picture()
+                o1 = CNN1("1.jpg")
+                o2 = CNN1("2.jpg")
+                o3 = CNN1("3.jpg")
+                
+                o1 = o1.predicted_class      #It can be 0 or 1 (target or no target)
+                o2 = o2.predicted_class      #It can be 0 or 1                  
+                o3 = o3.predicted_class      #It can be 0 or 1                  
+                                
 
-                if next_state == 1:
+                if o1 == 0 or o2 == 0 or o3 == 0:
+                    next_state = 0           #It can be 0 or 1 (target or no target)
                     terminated = True                           # It has found the object
                     break
                 else:
-                    #next_state = CNN2(img)
-                    next_state = CNN2('./Data CNN2/010/10.jpg')
+                    img_Cc = env.concat()                   #3 images concatenated
+                    
+
+                    next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
                     next_state = next_state.predicted_class                     # It can be 1-4
 
             Buff.append((Cc,ar,next_state))
@@ -142,21 +147,33 @@ for episode in range(num_episodes):
                 Cc_t = torch.Tensor([c.item() for c in Cc]).unsqueeze(1)  # Convierte cada elemento de Cc a escalar
                 ar_t = torch.Tensor([a.item() for a in ar]).unsqueeze(1)  # Convierte cada elemento de ar a escalar
 
-                ap = Real_actor.forward(Cc_t)                 # Predicted action
+                ap = Predi_actor.forward(Cc_t)                 # Predicted action
                 ap_t = torch.argmax(ap).item()
-
+ 
                 val_qp = Predi_critic1.forward(Cc_t, ap_t).detach().max(1)[0]
-                val_qr = Real_critic1.forward(Cc_t, ar_t).detach().max(1)[0]
+                val_qr = Real_critic1.forward(next_stat_t, ar_t).detach().max(1)[0]
+
                 val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
                 val_qr.requires_grad_(True)
-                loss = F.mse_loss(val_qr.float(), val_qp.float())
+
+                r = reward(step)
+
+                loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
+
+                llA = 1 - loss
+
 
                 opt_critico1.zero_grad()
                 loss.backward()
                 opt_critico1.step()
 
+                for param, param_pred in zip(Real_critic1.parameters(), Predi_critic1.parameters()):
+                    param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
+                for param, param_pred in zip(Real_actor.parameters(), Predi_actor.parameters()):
+                    param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
+
             
 
-    print('Episodio:', episode, 'Recompensa:', episode_reward)
+    print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
