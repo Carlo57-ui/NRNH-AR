@@ -1,4 +1,3 @@
-import RPi.GPIO as GPIO
 import time
 import random
 import cv2
@@ -7,21 +6,11 @@ import serial
 
 ser = serial.Serial(
     port = "/dev/ttyACM0",              #Modificar este puerto JETSON -- "/dev/ttyACM0"  Computadora "COM3"
-    baudrate = 115200,
-    bytesize = serial.EIGHTBITS,
-    parity = serial.PARITY_NONE,
-    stopbits = serial.STOPBITS_ONE,
-    timeout = 2,
-    xonxoff = False,
-    rtscts = False,
-    dsrdtr = False,
-    write_timeout = 2)
+    baudrate = 115200)
 
 
 class Entorno:
     def __init__(self):
-  
-        GPIO.setmode(GPIO.BOARD)
         camSet = 'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=21/1 ! nvvidconv flip-method='+str(0)+' ! video/x-raw, width='+str(640)+', height='+str(480)+', format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
         #cam = cv2.VideoCapture(camSet)
         self.cam = cv2.VideoCapture(0)
@@ -65,8 +54,10 @@ class Entorno:
  
             ret,frame = self.cam.read()
 
-            cv2.imwrite("%d.jpg"%i,frame) 
-            print("Se toma foto ", i)
+            ent = ser.read()                # input message, indicate that servo is already moved
+            if ent == b'F':
+                cv2.imwrite("%d.jpg"%i,frame) 
+                print("Se toma foto ", i)
         #self.cam.release()
 
     def step(self,action):
