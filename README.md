@@ -1,4 +1,4 @@
-INSTRUCTIONS FOR USING THE ALGORITHM
+INSTRUCTIONS FOR USING THE NRNH-AR ALGORITHM
 
 1. Make the connections shown in the image "conexion.jpg"
 
