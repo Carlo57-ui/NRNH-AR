@@ -157,7 +157,7 @@ for episode in range(num_episodes):
                 val_qr.requires_grad_(True)
 
                 r = reward(step)
-
+            
                 loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
 
                 llA = 1 - loss
