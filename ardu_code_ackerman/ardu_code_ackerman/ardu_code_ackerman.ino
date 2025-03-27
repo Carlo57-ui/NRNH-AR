@@ -1,4 +1,4 @@
-#include <ESP32Servo.h>
+#include <Servo.h>
 
 int mensaje; 
 
@@ -18,6 +18,7 @@ int TRIG = 13;
 int DURACION;
 int DISTANCIA;
 
+//int coli = 0;
 
 void setup() {
   
@@ -83,8 +84,7 @@ void Stop()
   digitalWrite(IN2,LOW);
 }
 
-void sensor()
-{
+void sensor(){
   digitalWrite(TRIG, HIGH);     // generacion del pulso a enviar
   delay(1);                     // al pin conectado al trigger
   digitalWrite(TRIG, LOW);      // del sensor
@@ -92,25 +92,40 @@ void sensor()
   DURACION = pulseIn(ECO, HIGH);  // con funcion pulseIn se espera un pulso
                                   // alto en Echo
   DISTANCIA = DURACION / 58.2;    // distancia medida en centimetros
-  Serial.println(DISTANCIA);      // envio de valor de distancia por monitor serial
-  delay(2);                       // demora entre datos
+  delay(1);                       // demora entre datos
   
-  if(DISTANCIA < 20) //Si la distancia es mayor a 20cm no colisiona
+  
+  if(DISTANCIA < 25) //Si la distancia es mayor a 25cm no colisiona
   {
-    coli = 1
-    delay(500);
+    Serial.write('1');
   }
 
   else{
-    coli = 0
+    Serial.write('0');
   }
-
-  return coli
+   
 
 }
 
+
 void loop() {
   mensaje = Serial.read();  //lee el mensaje
+
+  if(mensaje == 'a'){
+    s1.write(0);
+    Serial.write('F');  //Enviar F para tomar foto
+  }
+
+  if(mensaje == 'b'){
+    s1.write(90);
+    Serial.write('F');  //Enviar F para tomar foto
+  }
+
+  if(mensaje == 'c'){
+    s1.write(180);
+    Serial.write('F');  //Enviar F para tomar foto
+  }
+
 
   if(mensaje == 'd'){
     go();
@@ -129,27 +144,9 @@ void loop() {
   }
 
   if(mensaje == 'M'){
-    signal = sensor();
-    return signal
+    sensor();
   }
 
-  if(mensaje == 'a'){
-    s1.write(0);
-    Serial.write('F');  //Enviar F para tomar foto
-  
-  }
-
-  if(mensaje == 'b'){
-    s1.write(90);
-    Serial.write('F');  //Enviar F para tomar foto
-  
-  }
-
-  if(mensaje == 'c'){
-    s1.write(180);
-    Serial.write('F');  //Enviar F para tomar foto
-
-  }
 
                   
 }

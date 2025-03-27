@@ -10,8 +10,14 @@ int IN4 = 13;
 
 //servos
 Servo s1;
+Servo s3;
+Servo s4;
+Servo s6;
 
 int servo1 = 19;
+int servo3 = 5;
+int servo4 = 4;
+int servo6 = 15;
 
 
 void setup() {
@@ -22,6 +28,9 @@ void setup() {
   pinMode(IN4, OUTPUT);
 
   s1.attach(servo1);
+  s3.attach(servo3);
+  s4.attach(servo4);
+  s6.attach(servo6);
 
   Serial.begin(115200);
 }
@@ -37,6 +46,7 @@ int limitToMaxValue(int value, int maxValue) {
 void loop() {
   int speedLeft = 0; 
   int speedRight = 0; 
+  mensaje = Serial.read();
 
   if (Serial.available() > 0) {
     String data = Serial.readStringUntil('\n'); 
@@ -74,15 +84,28 @@ void loop() {
       }
       
     }
+    //Recto
+  if(mensaje == 'a'){
+    s1.write(90);
+    s3.write(90);
+    s4.write(90);
+    s6.write(90);
+  }
+    //Arco abierto a la izquierda
+  if(mensaje == 'b'){
+    s1.write(0);
+    s3.write(0);
+    s4.write(180);
+    s6.write(180);
+  }
 
-    if(mensaje == 'f'){
-      s1.write(90);
-      s2.write(90);
-      s3.write(90);
-      s4.write(90);
-      s5.write(90);
-      s6.write(90);
-      delay(1000);
-    }
+    //Arco abierto a la derecha
+  if(mensaje == 'c'){
+    s1.write(180);
+    s3.write(180);
+    s4.write(0);
+    s6.write(0);
+  }
+
   }                  
 }
