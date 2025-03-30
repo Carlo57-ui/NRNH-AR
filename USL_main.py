@@ -171,3 +171,4 @@ for episode in range(num_episodes):
     print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
+env.fin()

@@ -38,8 +38,8 @@ void setup() {
 
 void go()
 {
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
+  digitalWrite(IN1,LOW);
+  digitalWrite(IN2,HIGH);
 }
 
 void turn_left() {
@@ -49,14 +49,14 @@ void turn_left() {
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    delay(100); // Adjust delay as needed
+    delay(300); // Adjust delay as needed
 
     // Move right backward
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    delay(100); // Adjust delay as needed
+    delay(300); // Adjust delay as needed
   }
 }
 
@@ -67,14 +67,14 @@ void turn_right() {
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    delay(100); // Adjust delay as needed
+    delay(300); // Adjust delay as needed
 
     // Move right backward
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    delay(100); // Adjust delay as needed
+    delay(300); // Adjust delay as needed
   }
 }
 
@@ -109,44 +109,50 @@ void sensor(){
 
 
 void loop() {
-  mensaje = Serial.read();  //lee el mensaje
-
-  if(mensaje == 'a'){
-    s1.write(0);
-    Serial.write('F');  //Enviar F para tomar foto
-  }
-
-  if(mensaje == 'b'){
-    s1.write(90);
-    Serial.write('F');  //Enviar F para tomar foto
-  }
-
-  if(mensaje == 'c'){
-    s1.write(180);
-    Serial.write('F');  //Enviar F para tomar foto
-  }
-
-
-  if(mensaje == 'd'){
-    go();
-  }
-
-  if(mensaje == 'e'){
-    turn_left();
-  }
   
-  if(mensaje == 'f'){
-    turn_right();
-  }
-  
-  if(mensaje == 'g'){
-    Stop();
-  }
 
-  if(mensaje == 'M'){
-    sensor();
+  if (Serial.available()) {
+    mensaje = Serial.read();  //lee el mensaje
+
+    if(mensaje == 'a'){
+      s1.write(45);
+      delay(1000);
+      Serial.write('F');  //Enviar F para tomar foto
+    }
+
+    else if(mensaje == 'b'){
+      s1.write(90);
+      delay(1000);
+      Serial.write('F');  //Enviar F para tomar foto
+    }
+
+    else if(mensaje == 'c'){
+      s1.write(135);
+      delay(1000);
+      Serial.write('F');  //Enviar F para tomar foto
+    }
+
+
+    else if(mensaje == 'd'){
+      go();
+    }
+
+    else if(mensaje == 'e'){
+      turn_left();
+    }
+    
+    else if(mensaje == 'f'){
+      turn_right();
+    }
+    
+    else if(mensaje == 'g'){
+      Stop();
+    }
+
+    else if(mensaje == 'M'){
+      sensor();
+    }
+
   }
-
-
                   
 }
