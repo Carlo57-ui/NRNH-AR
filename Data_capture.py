@@ -2,21 +2,36 @@ import cv2
 import time
 
 # Define the path to the output directory
-output_dir = "./Data CNN1/Target"
+output_dir = "./Data CNN1/No target"
 
 # Initialize the camera
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(1)
 
-# Capture 200 images with a 1-second delay between each
-for i in range(200):
+# Initialize the image counter
+image_count = 0
+
+# Capture images until the user presses 'c'
+while True:
     # Capture a frame from the camera
     ret, frame = camera.read()
 
-    # Save the frame as an image
-    cv2.imwrite(f"{output_dir}/{i}.jpg", frame)
+    # Display the frame
+    cv2.imshow("Press 'c' to capture", frame)
 
-    # Wait for 1 second
-    time.sleep(1)
+    # Wait for a key press
+    key = cv2.waitKey(1) & 0xFF
 
-# Release the camera
+    # If the user presses 'c', capture an image
+    if key == ord("c"):
+        # Save the frame as an image
+        cv2.imwrite(f"{output_dir}/{image_count}.jpg", frame)
+        print(f"Image {image_count} captured.")
+        image_count += 1
+
+    # If the user presses 'q', quit the program
+    if key == ord("q"):
+        break
+
+# Release the camera and close the window
 camera.release()
+cv2.destroyAllWindows()
