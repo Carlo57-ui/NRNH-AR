@@ -10,6 +10,7 @@ camera = cv2.VideoCapture(1)
 
 # Initialize the image counter
 image_count = 0
+num = 0
 
 # Initialize a list to store the captured images
 images = []
@@ -28,7 +29,7 @@ while True:
     # If the user presses 'c', capture an image
     if key == ord("c"):
         # Save the frame as an image
-        cv2.imwrite(f"{output_dir}/image_{image_count}.jpg", frame)
+        cv2.imwrite(f"{image_count}.jpg", frame)
         print(f"Image {image_count} captured.")
 
         # Add the captured image to the list
@@ -43,9 +44,10 @@ while True:
             concatenated_image = np.concatenate(images, axis=1)
 
             # Save the concatenated image
-            cv2.imwrite(f"{output_dir}/{image_count // 3}.jpg", concatenated_image)
-            print(f"Concatenated image {image_count // 3}saved.",concatenated_image)
-
+            cv2.imwrite(f"{output_dir}/{num}.jpg", concatenated_image)
+            print(f"Concatenated image {num}saved.")
+            num += 1
+            
             # Reset the image counter and the image list
             image_count = 0
             images = []

@@ -2,7 +2,7 @@
 
 int mensaje; 
 
-//motores
+//motors
 int IN1 = 10;
 int IN2 = 9;
 int IN3 = 8;
@@ -12,13 +12,11 @@ int IN4 = 7;
 Servo s1;
 int servo1 = 11;
 
-//VARIABLES DEL SENSOR DE PROXIMIDAD//
+//Proximity sensor variables
 int ECO = 12;       
 int TRIG = 13;      
 int DURACION;
 int DISTANCIA;
-
-//int coli = 0;
 
 void setup() {
   
@@ -29,18 +27,20 @@ void setup() {
 
   s1.attach(servo1);
 
-  //SENSOR DE PROXIMIDAD//
+  //PROXIMITY SENSOR
   pinMode(TRIG, OUTPUT);  
   pinMode(ECO, INPUT);
 
   Serial.begin(115200);
 }
 
+//ACTIONS
 void go()
 {
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
 }
+
 
 void turn_left() {
   for (int i = 0; i < 5; i++) {
@@ -85,17 +85,17 @@ void Stop()
 }
 
 void sensor(){
-  digitalWrite(TRIG, HIGH);     // generacion del pulso a enviar
-  delay(1);                     // al pin conectado al trigger
-  digitalWrite(TRIG, LOW);      // del sensor
+  digitalWrite(TRIG, HIGH);     // generation of the pulse to be sent
+  delay(1);                     
+  digitalWrite(TRIG, LOW);      
   
-  DURACION = pulseIn(ECO, HIGH);  // con funcion pulseIn se espera un pulso
-                                  // alto en Echo
-  DISTANCIA = DURACION / 58.2;    // distancia medida en centimetros
-  delay(1);                       // demora entre datos
+  DURACION = pulseIn(ECO, HIGH);  // with pulseIn function a pulse is expected
+                                
+  DISTANCIA = DURACION / 58.2;    // distance measured in centimeters
+  delay(1);                       // delay between data
   
   
-  if(DISTANCIA < 25) //Si la distancia es mayor a 25cm no colisiona
+  if(DISTANCIA < 25) //if DISTANCIA is lower than 25cm this colides
   {
     Serial.write('1');
   }
@@ -112,24 +112,24 @@ void loop() {
   
 
   if (Serial.available()) {
-    mensaje = Serial.read();  //lee el mensaje
+    mensaje = Serial.read();  //Read the message
 
     if(mensaje == 'a'){
       s1.write(45);
       delay(1000);
-      Serial.write('F');  //Enviar F para tomar foto
+      Serial.write('F');  //Send 'F' to take picture
     }
 
     else if(mensaje == 'b'){
       s1.write(90);
       delay(1000);
-      Serial.write('F');  //Enviar F para tomar foto
+      Serial.write('F');  //Send 'F' to take picture
     }
 
     else if(mensaje == 'c'){
       s1.write(135);
       delay(1000);
-      Serial.write('F');  //Enviar F para tomar foto
+      Serial.write('F');  //Send 'F' to take picture
     }
 
 
