@@ -5,7 +5,7 @@ import time
 output_dir = "./Data CNN1/No target"
 
 # Initialize the camera
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 
 # Initialize the image counter
 image_count = 0

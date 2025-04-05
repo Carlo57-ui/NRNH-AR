@@ -114,19 +114,19 @@ void loop() {
   if (Serial.available()) {
     mensaje = Serial.read();  //Read the message
 
-    if(mensaje == 'a'){
-      s1.write(45);
+    if(mensaje == 'a'){     //Right
+      s1.write(40);
       delay(1000);
       Serial.write('F');  //Send 'F' to take picture
     }
 
-    else if(mensaje == 'b'){
-      s1.write(90);
+    else if(mensaje == 'b'){ //Front
+      s1.write(85);
       delay(1000);
       Serial.write('F');  //Send 'F' to take picture
     }
 
-    else if(mensaje == 'c'){
+    else if(mensaje == 'c'){ //Left
       s1.write(135);
       delay(1000);
       Serial.write('F');  //Send 'F' to take picture

@@ -12,8 +12,10 @@ INSTRUCTIONS FOR USING THE NRNH-AR ALGORITHM
 
 6. Run "CNN1_inf.py" and "CNN2_inf.py" to perform inference.
 
-7. Run the first stage "SSL_main.py" until you achieve a learning level of 1 for 10 consecutive episodes. Then, train "CNN2_train.py" again.
+7. You can test the prediction effectiveness of your CNN's training with "Try_CNNs.py"
 
-8. Run the second stage "USL_main.py" until you achieve a learning level A of 1 for 10 consecutive episodes. Then, train "CNN2_train.py" again.
+8. Run the first stage "SSL_main.py" until you achieve a learning level of 1 for 10 consecutive episodes. Then, train "CNN2_train.py" again.
 
-9. Run the final stage "DRL_main.py" until you want to train, ideally until a learning level A of 1 for 10 consecutive episodes.
+9. Run the second stage "USL_main.py" until you achieve a learning level A of 1 for 10 consecutive episodes. Then, train "CNN2_train.py" again.
+
+10. Run the final stage "DRL_main.py" until you want to train, ideally until a learning level A of 1 for 10 consecutive episodes.
