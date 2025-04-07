@@ -5,7 +5,7 @@ import serial
 
 
 
-ser = serial.Serial(port = "/dev/ttyACM0", baudrate = 115200)     #Modificar este puerto JETSON -- "/dev/ttyUSB0"  Computadora "COM10"
+ser = serial.Serial(port = "/dev/ttyACM1", baudrate = 115200)     #Modificar este puerto JETSON -- "/dev/ttyUSB0"  Computadora "COM10"
 #ser = serial.Serial(port = "COM11", baudrate = 115200)
 time.sleep(1.7)  #Es necesario colocar el time para que pueda leer y enviar mensajes
 
@@ -56,7 +56,7 @@ class Entorno:
             if ent == b'F':
                 time.sleep(2)
                 cv2.imwrite("%d.jpg"%i,frame) 
-                print("Se toma foto ", i)
+                print("Take picture ", i)
         cam.release()
 
     def step(self,action):
@@ -78,3 +78,6 @@ class Entorno:
 
     def fin(self):
         ser.close()
+
+
+

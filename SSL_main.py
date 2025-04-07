@@ -66,27 +66,33 @@ dif_q = 1
 # Bucle de entrenamiento
 for episode in range(num_episodes):
     state = env.reset()                             # Ultrasonic sensor signal (0,1)
-    
+
     while state == 0:
         action = random.randint(1,4)                # random action (1:go, 2:turn left, 3:turn right, 4:stop)
+        env.step(action)
         state = env.reset()
+        print("State: ", state)
+        print("Action: ", action)
+        time.sleep(1)                             # Time to do the action
+
+    action = 4
+    env.step(action)
 
     for step in range(max_number_of_steps):
-        action = 4                                  # action 4
-        env.step(action)
         img = env.take_picture()
 
         o1 = CNN1("1.jpg")
         o2 = CNN1("2.jpg")
         o3 = CNN1("3.jpg")
         
-        o1 = o1.predicted_class      #It can be 0 or 1 (target or no target)
-        o2 = o2.predicted_class      #It can be 0 or 1                  
-        o3 = o3.predicted_class      #It can be 0 or 1                  
+        o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+        o2 = o2.predicted_class      #It can be 1 or 0                  
+        o3 = o3.predicted_class      #It can be 1 or 0                  
            
 
-        if o1 == 0 or o2 == 0 or o3 == 0:
+        if o1 == 1 or o2 == 1 or o3 == 1:
             terminated = True                           # It has found the object
+            print("The objetive has been find")
             break
         else:
             img_Cc = env.concat()                   #3 images concatenated
@@ -103,23 +109,29 @@ for episode in range(num_episodes):
             qr = Real_critic1.forward(Cc_t, ar_t)           # Real Q
             qp = Predi_critic1.forward(Cc_t, ap_t)          # Predicted Q
            
-            next_state = env.step(ar)              # Do the action
+            env.step(ar)              # Do the action
+            next_state = env.reset()
+            print("AR: ", ar)
+            time.sleep(1)  #Time to do the action
+           
             if next_state == 0:
                 next_state = 0
             else:
+                env.step(4)
                 img = env.take_picture()
                 o1 = CNN1("1.jpg")
                 o2 = CNN1("2.jpg")
                 o3 = CNN1("3.jpg")
                 
-                o1 = o1.predicted_class      #It can be 0 or 1 (target or no target)
-                o2 = o2.predicted_class      #It can be 0 or 1                  
-                o3 = o3.predicted_class      #It can be 0 or 1                  
+                o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+                o2 = o2.predicted_class      #It can be 1 or 0                  
+                o3 = o3.predicted_class      #It can be 1 or 0                  
                                 
 
-                if o1 == 0 or o2 == 0 or o3 == 0:
-                    next_state = 0           #It can be 0 or 1 (target or no target)
+                if o1 == 1 or o2 == 1 or o3 == 1:
+                    next_state = 0           #It can be 1 or 0 (target or no target)
                     terminated = True                           # It has found the object
+                    print("The objective has been find")
                     break
                 else:
                     img_Cc = env.concat()                   #3 images concatenated
@@ -127,7 +139,8 @@ for episode in range(num_episodes):
 
                     next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
                     next_state = next_state.predicted_class                     # It can be 1-4
-
+                    print("Next_state: ",next_state)
+            
             Buff.append((Cc,ar,next_state))
             Buff.save()
 
@@ -146,7 +159,7 @@ for episode in range(num_episodes):
                 loss = F.mse_loss(val_qr.float(), val_qp.float())
 
                 dif_true = val_qr.float()-val_qp.float()
-
+                
                 if dif_true < dif_q:
                     llA += 0.1
                 else:
@@ -162,7 +175,7 @@ for episode in range(num_episodes):
 
             
 
-    print('Episodio:', episode, 'Learning Level A: ', llA)
+                print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
 env.fin()
