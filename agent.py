@@ -5,7 +5,7 @@ import serial
 
 
 
-ser = serial.Serial(port = "/dev/ttyACM1", baudrate = 115200)     #Modificar este puerto JETSON -- "/dev/ttyUSB0"  Computadora "COM10"
+ser = serial.Serial(port = "/dev/ttyACM0", baudrate = 115200)     #Modificar este puerto JETSON -- "/dev/ttyUSB0"  Computadora "COM10"
 #ser = serial.Serial(port = "COM11", baudrate = 115200)
 time.sleep(1.7)  #Es necesario colocar el time para que pueda leer y enviar mensajes
 
