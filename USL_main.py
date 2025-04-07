@@ -73,23 +73,29 @@ for episode in range(num_episodes):
     while state == 0:
         action = random.randint(1,4)                # random action (1:go, 2:turn left, 3:turn right, 4:stop)
         state = env.reset()
+        print("State: ", state)
+        print("Action: ", action)
+        time.sleep(1)   
+
+    action = 4                                  # action 4
+    env.step(action)
 
     for step in range(max_number_of_steps):
-        action = 4                                  # action 4
-        env.step(action)
+        
         img = env.take_picture()
 
         o1 = CNN1("1.jpg")
         o2 = CNN1("2.jpg")
         o3 = CNN1("3.jpg")
         
-        o1 = o1.predicted_class      #It can be 0 or 1 (target or no target)
-        o2 = o2.predicted_class      #It can be 0 or 1                  
-        o3 = o3.predicted_class      #It can be 0 or 1                  
+        o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+        o2 = o2.predicted_class      #It can be 1 or 0                  
+        o3 = o3.predicted_class      #It can be 1 or 0                  
            
 
-        if o1 == 0 or o2 == 0 or o3 == 0:
+        if o1 == 1 or o2 == 1 or o3 == 1:
             terminated = True                           # It has found the object
+            print("The objetive has been find")
             break
         else:
             img_Cc = env.concat()                   #3 images concatenated
@@ -109,31 +115,35 @@ for episode in range(num_episodes):
             qr = Real_critic1.forward(next_stat_t, ar_t)      # Real Q with next_stat_t (C ̃_c)
             qp = Predi_critic1.forward(Cc_t, ap_t)            # Predicted Q
            
-            next_state = env.step(ar)              # Do the action
+            env.step(ar)              # Do the action
+            next_state = env.reset()
+            print("AR: ", ar)
+            time.sleep(1)  #Time to do the action
 
             if next_state == 0:
                 next_state = 0
             else:
+                env.step(4)
                 img = env.take_picture()
                 o1 = CNN1("1.jpg")
                 o2 = CNN1("2.jpg")
                 o3 = CNN1("3.jpg")
                 
-                o1 = o1.predicted_class      #It can be 0 or 1 (target or no target)
-                o2 = o2.predicted_class      #It can be 0 or 1                  
-                o3 = o3.predicted_class      #It can be 0 or 1                  
+                o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+                o2 = o2.predicted_class      #It can be 1 or 0                  
+                o3 = o3.predicted_class      #It can be 1 or 0                  
                                 
 
-                if o1 == 0 or o2 == 0 or o3 == 0:
+                if o1 == 1 or o2 == 1 or o3 == 1:
                     next_state = 0           #It can be 0 or 1 (target or no target)
                     terminated = True                           # It has found the object
+                    print("The objective has been find")
                     break
                 else:
                     img_Cc = env.concat()                   #3 images concatenated
-                    
-
                     next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
                     next_state = next_state.predicted_class                     # It can be 1-4
+                    print("Next_state: ",next_state)
 
             Buff.append((Cc,ar,next_state))
             Buff.save()
@@ -166,7 +176,7 @@ for episode in range(num_episodes):
                 for param, param_pred in zip(Real_actor.parameters(), Predi_actor.parameters()):
                     param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
 
-            
+        print('Step: ', step)
 
     print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
