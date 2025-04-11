@@ -39,42 +39,43 @@ void go()
 {
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
+  delay(2100);
 }
 
 
 void turn_left() {
-  for (int i = 0; i < 40; i++) {
+  for (int i = 0; i < 2; i++) {
     // Move left forward
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    delay(400); // Adjust delay as needed
+    delay(1000); // Adjust delay as needed
 
     // Move right backward
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    delay(400); // Adjust delay as needed
+    delay(1000); // Adjust delay as needed
   }
 }
 
 void turn_right() {
-  for (int i = 0; i < 40; i++) {
+  for (int i = 0; i < 2; i++) {
     // Move left forward
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    delay(400); // Adjust delay as needed
+    delay(1000); // Adjust delay as needed
 
     // Move right backward
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    delay(400); // Adjust delay as needed
+    delay(1000); // Adjust delay as needed
   }
 }
 
@@ -153,6 +154,10 @@ void loop() {
       sensor();
     }
 
+  }
+
+  else{
+    Stop();
   }
                   
 }

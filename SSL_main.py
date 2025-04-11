@@ -113,6 +113,7 @@ for episode in range(num_episodes):
             next_state = env.reset()
             print("AR: ", ar)
             time.sleep(1)  #Time to do the action
+            
            
             if next_state == 0:
                 next_state = 0
