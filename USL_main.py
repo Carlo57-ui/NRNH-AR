@@ -11,7 +11,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 40
+num_episodes = 97
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -19,7 +19,7 @@ tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
-llA = 0.9975                       # Learning Level A
+llA = 0.9999                       # Learning Level A
 
 
 input_size = 1
