@@ -136,7 +136,7 @@ for episode in range(num_episodes):
                                 
 
                 if o1 == 1 or o2 == 1 or o3 == 1:
-                    next_state = 0           #It can be 0 or 1 (target or no target)
+                    next_state = 0           #It can be 1 or 0 (target or no target)
                     terminated = True                           # It has found the object
                     print("The objective has been find")
                     break

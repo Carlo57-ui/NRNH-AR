@@ -11,7 +11,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 5
+num_episodes = 50
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -19,7 +19,7 @@ tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
-llA = 1                       # Learning Level A
+llA = 0.9999                       # Learning Level A
 dis_t = 0.01                  # Discount time of reward
 
 
@@ -56,7 +56,7 @@ except FileNotFoundError:
   
 # Load the buffer if it exists
 try:
-  Buff = ReplayBuffer.load(buffer_size)
+  Buff = ReplayBuffer(buffer_size).loads()
   print("Buffer successfully.")
 except FileNotFoundError:   
   Buff = ReplayBuffer(buffer_size)
@@ -86,7 +86,6 @@ for episode in range(num_episodes):
     env.step(action)
 
     for step in range(max_number_of_steps):
-        
         img = env.take_picture()
 
         o1 = CNN1("1.jpg")
@@ -119,15 +118,17 @@ for episode in range(num_episodes):
 
             qr = Real_critic1.forward(next_stat_t, ar_t)      # Real Q with next_stat_t (C ̃_c)
             qp = Predi_critic1.forward(Cc_t, ap_t)            # Predicted Q
-           
-            env.step(ar)              # Do the action
+
+            ar_t2 = ar_t + 1
+            env.step(ar_t2)              # Do the action
             next_state = env.reset()
-            print("AR: ", ar)
+            print("AR: ", ar_t2)
             time.sleep(1)  #Time to do the action
 
             if next_state == 0:
                 next_state = 0
             else:
+                env.step(4)
                 img = env.take_picture()
                 o1 = CNN1("1.jpg")
                 o2 = CNN1("2.jpg")
@@ -145,13 +146,11 @@ for episode in range(num_episodes):
                     break
                 else:
                     img_Cc = env.concat()                   #3 images concatenated
-                    
-
                     next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
                     next_state = next_state.predicted_class                     # It can be 1-4
                     print("Next_state: ",next_state)
                     
-            Buff.append((Cc,ar,next_state))
+            Buff.append((Cc,ar_t2,next_state))
             Buff.save()
 
             if Buff.size() >= batch_size:
@@ -184,9 +183,9 @@ for episode in range(num_episodes):
                 for param, param_pred in zip(Real_actor.parameters(), Predi_actor.parameters()):
                     param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
 
-            
+        print('Step: ', step)    
 
-    print('Episodio:', episode, 'Learning Level A: ', llA)
+    print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', r)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
 env.fin()
