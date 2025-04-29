@@ -11,7 +11,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 50
+num_episodes = 31
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -19,8 +19,8 @@ tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
-llA = 0.9999                       # Learning Level A
-dis_t = 0.01                  # Discount time of reward
+llA = 0.973                    # Learning Level A
+dis_t = 0.001                  # Discount time of reward
 
 
 input_size = 1
@@ -168,6 +168,7 @@ for episode in range(num_episodes):
                 val_qr.requires_grad_(True)
 
                 r = reward(step)
+                print ("Reward: ", r)
             
                 loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
 
@@ -185,7 +186,7 @@ for episode in range(num_episodes):
 
         print('Step: ', step)    
 
-    print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', r)
+    print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
 env.fin()
