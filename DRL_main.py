@@ -11,7 +11,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 31
+num_episodes = 70
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -20,8 +20,8 @@ policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
 llA = 0.973                    # Learning Level A
-dis_t = 0.001                  # Discount time of reward
-
+dis_t = 0.1                    # Discount time of reward
+reward = 0
 
 input_size = 1
 output_size = 2
@@ -44,9 +44,6 @@ Real_critic1.load_state_dict(Predi_critic1.state_dict())
 opt_actor = optim.Adam(Predi_actor.parameters(), lr=learning_rate)
 opt_critico1 = optim.Adam(Predi_critic1.parameters(), lr=learning_rate)
 
-# Initialize the global reward
-recompensa_global = 0
-
 # Load the model if it exists
 try:
   Predi_actor.load_state_dict(torch.load('weights.pth', weights_only=True))
@@ -62,9 +59,7 @@ except FileNotFoundError:
   Buff = ReplayBuffer(buffer_size)
   print("Buffer not found.")
 
-def reward(step):
-    r = 1 - dis_t * step 
-    return r
+
 
 # Create an object of the Environment class
 env = Entorno()
@@ -82,10 +77,11 @@ for episode in range(num_episodes):
         print("Action: ", action)
         time.sleep(1) 
 
-    action = 4                                  # action 4
-    env.step(action)
+    env.step(4)                                 # stop
+    env.step(5)                                 # back
 
     for step in range(max_number_of_steps):
+        
         img = env.take_picture()
 
         o1 = CNN1("1.jpg")
@@ -97,9 +93,11 @@ for episode in range(num_episodes):
         o3 = o3.predicted_class      #It can be 1 or 0                  
            
 
-        if o1 == 1 or o2 == 1 or o3 == 1:
+        if o1 == 1 or o2 == 1 or o3 == 1:                                
             terminated = True                           # It has found the object
             print("The objetive has been find")
+            r = 3                                       # reward if find or not the target
+
             break
         else:
             img_Cc = env.concat()                   #3 images concatenated
@@ -108,8 +106,8 @@ for episode in range(num_episodes):
             Cc = Cc.predicted_class                    # It can be 1-4
             Cc_t = torch.Tensor([Cc]).unsqueeze(1)     # Agrega una nueva dimensión en la posición 1
 
-            Cc, ar, next_stat = Buff.sample(batch_size, device)            # From buffer
-            next_stat_t = torch.Tensor([n.item() for n in next_stat]).unsqueeze(1)
+            Cc_b, ar_b, next_state_b = Buff.sample(batch_size, device)            # From buffer
+            next_stat_t = torch.Tensor([n.item() for n in next_state_b]).unsqueeze(1)
 
             ap = Predi_actor.forward(Cc_t)             # Predicted action
             ar = Real_actor.forward(next_stat_t)       # Real action with next_stat_t (C ̃_c)
@@ -120,15 +118,20 @@ for episode in range(num_episodes):
             qp = Predi_critic1.forward(Cc_t, ap_t)            # Predicted Q
 
             ar_t2 = ar_t + 1
+            r1 = -1
             env.step(ar_t2)              # Do the action
-            next_state = env.reset()
-            print("AR: ", ar_t2)
+            next_state = env.reset()     # Ultrasonic sensor signal (0,1)
+
+            #print("Real action: ", ar_t2)
             time.sleep(1)  #Time to do the action
 
             if next_state == 0:
                 next_state = 0
+                r2 = 1
             else:
                 env.step(4)
+                env.step(5) 
+
                 img = env.take_picture()
                 o1 = CNN1("1.jpg")
                 o2 = CNN1("2.jpg")
@@ -143,13 +146,16 @@ for episode in range(num_episodes):
                     next_state = 0           #It can be 1 or 0 (target or no target)
                     terminated = True                           # It has found the object
                     print("The objective has been find")
+                    r2 = 3
+                    r = r1 + r2
                     break
                 else:
                     img_Cc = env.concat()                   #3 images concatenated
                     next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
                     next_state = next_state.predicted_class                     # It can be 1-4
                     print("Next_state: ",next_state)
-                    
+                    r2 = -1
+        
             Buff.append((Cc,ar_t2,next_state))
             Buff.save()
 
@@ -167,11 +173,9 @@ for episode in range(num_episodes):
                 val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
                 val_qr.requires_grad_(True)
 
-                r = reward(step)
-                print ("Reward: ", r)
+                r = r1 + r2 - dis_t * step
             
                 loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
-
                 llA = 1 - loss
 
 
@@ -184,9 +188,15 @@ for episode in range(num_episodes):
                 for param, param_pred in zip(Real_actor.parameters(), Predi_actor.parameters()):
                     param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
 
-        print('Step: ', step)    
+        print('Step: ', step,"Reward: ", reward)  
+        reward = reward + r
 
-    print('Episodio:', episode, 'Learning Level A: ', llA)
+    reward = reward + r
+    print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', reward)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
+
+    if terminated:
+        break
+
 env.fin()

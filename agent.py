@@ -73,6 +73,9 @@ class Entorno:
         elif action == 4:                # Stop   
             ser.write("g".encode())
             print("Stop")
+        elif action == 5:                # Stop   
+            ser.write("h".encode())
+            print("Back")
         next_state = self.reset()        # Cc~ con el sensor o bien las fotos concatenadas
         return next_state   
 

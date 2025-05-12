@@ -42,6 +42,12 @@ void go()
   delay(2100);
 }
 
+void Back()
+{
+  digitalWrite(IN1,HIGH);
+  digitalWrite(IN2,LOW);
+  delay(2100);
+}
 
 void turn_left() {
   for (int i = 0; i < 2; i++) {
@@ -148,6 +154,10 @@ void loop() {
     
     else if(mensaje == 'g'){
       Stop();
+    }
+
+    else if(mensaje == 'h'){
+      Back();
     }
 
     else if(mensaje == 'M'){
