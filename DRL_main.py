@@ -75,7 +75,7 @@ for episode in range(num_episodes):
         state = env.reset()
         print("State: ", state)
         print("Action: ", action)
-        time.sleep(1) 
+        time.sleep(1)
 
     env.step(4)                                 # stop
     env.step(5)                                 # back
@@ -96,7 +96,7 @@ for episode in range(num_episodes):
         if o1 == 1 or o2 == 1 or o3 == 1:                                
             terminated = True                           # It has found the object
             print("The objetive has been find")
-            r = 3                                       # reward if find or not the target
+            r = 3                                       # reward if find the target
 
             break
         else:
@@ -118,7 +118,7 @@ for episode in range(num_episodes):
             qp = Predi_critic1.forward(Cc_t, ap_t)            # Predicted Q
 
             ar_t2 = ar_t + 1
-            r1 = -1
+            r1 = -1                      # state reward
             env.step(ar_t2)              # Do the action
             next_state = env.reset()     # Ultrasonic sensor signal (0,1)
 
@@ -127,7 +127,7 @@ for episode in range(num_episodes):
 
             if next_state == 0:
                 next_state = 0
-                r2 = 1
+                r2 = 1                   # next_state reward
             else:
                 env.step(4)
                 env.step(5) 
@@ -146,15 +146,15 @@ for episode in range(num_episodes):
                     next_state = 0           #It can be 1 or 0 (target or no target)
                     terminated = True                           # It has found the object
                     print("The objective has been find")
-                    r2 = 3
-                    r = r1 + r2
+                    r2 = 3                   # next_state reward
+                    r = r1 + r2 - step * dis_t
                     break
                 else:
                     img_Cc = env.concat()                   #3 images concatenated
                     next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
                     next_state = next_state.predicted_class                     # It can be 1-4
                     print("Next_state: ",next_state)
-                    r2 = -1
+                    r2 = -1                 # next_state reward
         
             Buff.append((Cc,ar_t2,next_state))
             Buff.save()
