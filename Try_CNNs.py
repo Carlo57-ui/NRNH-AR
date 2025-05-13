@@ -1,26 +1,39 @@
 from CNN1_inf import CNN1_inf as CNN1
 from CNN2_inf import CNN2_inf as CNN2
+#from agent import Entorno
+
+#env = Entorno()
 
 '''With data pictures'''
 
-case = CNN1('./Data CNN1/No target/10.jpg')
+case = CNN1('./Data CNN1/Target/100.jpg')
 case = case.predicted_class
 
-case2 = CNN2('./Data CNN2/010/10.jpg')
-case2 = case2.predicted_class
+#case2 = CNN2('./Data CNN2/010/10.jpg')
+#case2 = case2.predicted_class
 
 print("CASE CNN1", case)
-print("CASE CNN2", case2)
+#print("CASE CNN2", case2)
 
 
 '''With robot'''
-import cv2
-cam = cv2.VideoCapture(0)
-ret,frame = cam.read()
-cv2.imwrite("TryCNN.jpg",frame) 
-cam.release()
+#img = env.take_picture()
 
-case = CNN1('TryCNN.jpg')
-case = case.predicted_class
+#o1 = CNN1("1.jpg")
+#o2 = CNN1("2.jpg")
+#o3 = CNN1("3.jpg")
+        
+#o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+#o2 = o2.predicted_class      #It can be 1 or 0                  
+#o3 = o3.predicted_class      #It can be 1 or 0  
 
-print("CASE CNN1", case)
+#print("o1", o1)
+#print("o2", o2)
+#print("o3", o3)
+
+#img_Cc = env.concat()                   #3 images concatenated
+            
+#Cc = CNN2("cat.jpg")                       # concatenated image in CNN2
+#Cc = Cc.predicted_class  
+
+#print("Cat: ", Cc)

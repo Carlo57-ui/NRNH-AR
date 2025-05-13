@@ -11,7 +11,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 70
+num_episodes = 5
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -63,7 +63,7 @@ except FileNotFoundError:
 
 # Create an object of the Environment class
 env = Entorno()
-
+terminated = False
 
 # Bucle de entrenamiento
 for episode in range(num_episodes):
@@ -96,7 +96,7 @@ for episode in range(num_episodes):
         if o1 == 1 or o2 == 1 or o3 == 1:                                
             terminated = True                           # It has found the object
             print("The objetive has been find")
-            r = 3                                       # reward if find the target
+            r = 10                                       # reward if find the target
 
             break
         else:
@@ -127,7 +127,9 @@ for episode in range(num_episodes):
 
             if next_state == 0:
                 next_state = 0
-                r2 = 1                   # next_state reward
+                r2 = 5                   # next_state reward
+                r= r1 + r2
+                break
             else:
                 env.step(4)
                 env.step(5) 
@@ -156,37 +158,36 @@ for episode in range(num_episodes):
                     print("Next_state: ",next_state)
                     r2 = -1                 # next_state reward
         
-            Buff.append((Cc,ar_t2,next_state))
-            Buff.save()
+        Buff.append((Cc,ar_t2,next_state))
+        Buff.save()
 
-            if Buff.size() >= batch_size:
-                Cc, ar, next_stat = Buff.sample(batch_size, device)
-                Cc_t = torch.Tensor([c.item() for c in Cc]).unsqueeze(1)  # Convierte cada elemento de Cc a escalar
-                ar_t = torch.Tensor([a.item() for a in ar]).unsqueeze(1)  # Convierte cada elemento de ar a escalar
+        if Buff.size() >= batch_size:
+            Cc, ar, next_stat = Buff.sample(batch_size, device)
+            Cc_t = torch.Tensor([c.item() for c in Cc]).unsqueeze(1)  # Convierte cada elemento de Cc a escalar
+            ar_t = torch.Tensor([a.item() for a in ar]).unsqueeze(1)  # Convierte cada elemento de ar a escalar
 
-                ap = Predi_actor.forward(Cc_t)                 # Predicted action
-                ap_t = torch.argmax(ap).item()
+            ap = Predi_actor.forward(Cc_t)                 # Predicted action
+            ap_t = torch.argmax(ap).item()
  
-                val_qp = Predi_critic1.forward(Cc_t, ap_t).detach().max(1)[0]
-                val_qr = Real_critic1.forward(next_stat_t, ar_t).detach().max(1)[0]
+            val_qp = Predi_critic1.forward(Cc_t, ap_t).detach().max(1)[0]
+            val_qr = Real_critic1.forward(next_stat_t, ar_t).detach().max(1)[0]
+            val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
+            val_qr.requires_grad_(True)
 
-                val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
-                val_qr.requires_grad_(True)
-
-                r = r1 + r2 - dis_t * step
+            r = r1 + r2 - dis_t * step
             
-                loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
-                llA = 1 - loss
+            loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
+            llA = 1 - loss
 
 
-                opt_critico1.zero_grad()
-                loss.backward()
-                opt_critico1.step()
+            opt_critico1.zero_grad()
+            loss.backward()
+            opt_critico1.step()
 
-                for param, param_pred in zip(Real_critic1.parameters(), Predi_critic1.parameters()):
-                    param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
-                for param, param_pred in zip(Real_actor.parameters(), Predi_actor.parameters()):
-                    param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
+            for param, param_pred in zip(Real_critic1.parameters(), Predi_critic1.parameters()):
+                param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
+            for param, param_pred in zip(Real_actor.parameters(), Predi_actor.parameters()):
+                param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
 
         print('Step: ', step,"Reward: ", reward)  
         reward = reward + r
