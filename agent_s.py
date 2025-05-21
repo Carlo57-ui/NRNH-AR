@@ -131,7 +131,3 @@ class Entorno():
         sim.simxStartSimulation(clientID,sim.simx_opmode_oneshot_wait)
         
 
-
-
-env = Entorno()
-env.step(5)
