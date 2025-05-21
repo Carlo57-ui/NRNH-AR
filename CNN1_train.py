@@ -22,7 +22,7 @@ transform = transforms.Compose([
 ])
 
 # Carga los datos de entrenamiento
-train_dataset = ImageFolder("./Data CNN1", transform=transform)
+train_dataset = ImageFolder("./Data CNN1_s", transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
 # Crea la instancia del modelo y la mueve al dispositivo
@@ -33,7 +33,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Entrenamiento del modelo
-epochs = 10
+epochs = 30
 for epoch in range(epochs):
     for i, (images, labels) in enumerate(train_loader):
         images = images.to(device)
@@ -55,4 +55,4 @@ for epoch in range(epochs):
             print(f'Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
 
 # Guarda los pesos del modelo
-torch.save(model.state_dict(), "cnn1.pth")
+torch.save(model.state_dict(), "cnn1_s.pth")

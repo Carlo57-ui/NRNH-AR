@@ -1,12 +1,16 @@
-from CNN1_inf import CNN1_inf as CNN1
-from CNN2_inf import CNN2_inf as CNN2
+#from CNN1_inf import CNN1_inf as CNN1
+#from CNN2_inf import CNN2_inf as CNN2
+
+from CNN1_inf import CNN1_inf_s as CNN1_s
+#from CNN2_inf import CNN2_inf_s as CNN2
+
 #from agent import Entorno
 
 #env = Entorno()
 
 '''With data pictures'''
 
-case = CNN1('./Data CNN1/Target/100.jpg')
+case = CNN1_s('./Data CNN1_s/No target/10.jpg')
 case = case.predicted_class
 
 #case2 = CNN2('./Data CNN2/010/10.jpg')

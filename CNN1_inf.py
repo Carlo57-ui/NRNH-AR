@@ -21,6 +21,10 @@ model = CNN(categories).to(device)
 model.load_state_dict(torch.load("cnn1.pth"))
 model.eval()  # Pon el modelo en modo de evaluación
 
+model_s = CNN(categories).to(device)
+model_s.load_state_dict(torch.load("cnn1_s.pth"))
+model_s.eval()  # Pon el modelo en modo de evaluación
+
 class CNN1_inf:
     def __init__(self, path):
         # Realiza predicciones sobre nuevas imágenes
@@ -43,4 +47,24 @@ class CNN1_inf:
             # Imprime la clase predicha
             #print(f'Predicted class: {self.predicted_class}')
 
+class CNN1_inf_s:
+    def __init__(self, path):
+        # Realiza predicciones sobre nuevas imágenes
+        with torch.no_grad():
+            image_path = os.path.abspath(path)
+            image = Image.open(image_path)
             
+            # Aplica las transformaciones a la imagen
+            image = transform(image)
+            # Convierte la imagen a un tensor y mueve al dispositivo
+            image = image.unsqueeze(0).to(device)
+            # Realiza la predicción
+            output = model_s(image)
+            # Obtiene la clase predicha
+            _, predicted_class = torch.max(output.data, 1)
+            # Define los nombres de las clases
+            class_names = [0, 1]  #0: No target 1: Target
+            # Obtiene el nombre de la clase
+            self.predicted_class = class_names[predicted_class.item()]
+            # Imprime la clase predicha
+            #print(f'Predicted class: {self.predicted_class}')

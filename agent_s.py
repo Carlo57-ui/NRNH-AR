@@ -127,7 +127,8 @@ class Entorno():
 
     def fin(self):
         # Reinicia el entorno
-        sim.simxStopSimulation(clientID,sim.simx_opmode_oneshot_wait) 
         sim.simxStartSimulation(clientID,sim.simx_opmode_oneshot_wait)
+        sim.simxStopSimulation(clientID,sim.simx_opmode_oneshot_wait)
+        
         
 
