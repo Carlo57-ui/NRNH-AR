@@ -17,6 +17,8 @@ INSTRUCTIONS FOR USING THE NRNH-AR ALGORITHM
 
 7. You can test the prediction effectiveness of your CNN's training with "Try_CNNs.py"
 
+NOTE: If you want to use it in the Real environment please use "from agent import Entorno" or if you want to use the simulation environment please use "from agen_s import Entorno" and comment the line "#env.fin()".
+
 8. Run the first stage "SSL_main.py" until you achieve a learning level of 1 for 10 consecutive episodes. Then, train "CNN2_train.py" again.
 
 9. Run the second stage "USL_main.py" until you achieve a learning level A of 1 for 10 consecutive episodes. Then, train "CNN2_train.py" again.
