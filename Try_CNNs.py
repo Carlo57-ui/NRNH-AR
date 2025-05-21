@@ -2,7 +2,7 @@
 #from CNN2_inf import CNN2_inf as CNN2
 
 from CNN1_inf import CNN1_inf_s as CNN1_s
-#from CNN2_inf import CNN2_inf_s as CNN2
+from CNN2_inf import CNN2_inf_s as CNN2_s
 
 #from agent import Entorno
 
@@ -10,14 +10,14 @@ from CNN1_inf import CNN1_inf_s as CNN1_s
 
 '''With data pictures'''
 
-case = CNN1_s('./Data CNN1_s/No target/10.jpg')
-case = case.predicted_class
+#case = CNN1_s('./Data CNN1_s/No target/10.jpg')
+#case = case.predicted_class
 
-#case2 = CNN2('./Data CNN2/010/10.jpg')
-#case2 = case2.predicted_class
+case2 = CNN2_s('./Data CNN2_s/111/1.jpg')
+case2 = case2.predicted_class
 
-print("CASE CNN1", case)
-#print("CASE CNN2", case2)
+#print("CASE CNN1", case)
+print("CASE CNN2", case2)
 
 
 '''With robot'''

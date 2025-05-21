@@ -68,17 +68,17 @@ class Entorno():
         img_vert1 = cv2.flip(img1,0)  #Voltea la imagen en vertical
         imagen1 = img_vert1
         x = 1
-        img_guardada_ent1 = cv2.imwrite('C:/Users/Jalapa/NRNH-AR/%d.jpg'%x, imagen1)
+        img_guardada_ent1 = cv2.imwrite('E:/Doctorado/Investigacion/Jetson/RedesNeuronales/NRNH-AR/%d.jpg'%x, imagen1)
 
         img_vert2 = cv2.flip(img2,0)  #Voltea la imagen en vertical
         imagen2 = img_vert2
         y = 2
-        img_guardada_ent1 = cv2.imwrite('C:/Users/Jalapa/NRNH-AR/%d.jpg'%y, imagen2)
+        img_guardada_ent1 = cv2.imwrite('E:/Doctorado/Investigacion/Jetson/RedesNeuronales/NRNH-AR/%d.jpg'%y, imagen2)
 
         img_vert3 = cv2.flip(img3,0)  #Voltea la imagen en vertical
         imagen3 = img_vert3
         z = 3
-        img_guardada_ent1 = cv2.imwrite('C:/Users/Jalapa/NRNH-AR/%d.jpg'%3, imagen3)
+        img_guardada_ent1 = cv2.imwrite('E:/Doctorado/Investigacion/Jetson/RedesNeuronales/NRNH-AR/%d.jpg'%3, imagen3)
 
 
     def step(self,action):
@@ -130,5 +130,5 @@ class Entorno():
         sim.simxStartSimulation(clientID,sim.simx_opmode_oneshot_wait)
         sim.simxStopSimulation(clientID,sim.simx_opmode_oneshot_wait)
         
-        
-
+env = Entorno()
+env.take_picture()        

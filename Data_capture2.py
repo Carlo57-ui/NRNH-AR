@@ -2,11 +2,11 @@ import cv2
 import time
 import numpy as np
 import os
-from agent import Entorno
+from agent_s import Entorno
 
 # Create an object of the Environment class
 env = Entorno()
-output_dir = "./Data CNN2/111"
+output_dir = "./Data CNN2_s/010"
 
 # Initialize the image counter
 num = 0
@@ -14,10 +14,10 @@ num = 0
 # Capture images until the user presses 'c'
 while True:
     # Save the frame as an image
-    img = env.take_picture()
+    env.take_picture()
 
     #3 images concatenated
-    img_Cc = env.concat() 
+    env.concat() 
     
     # Save the concatenated image
     filename = f"{output_dir}/{num}.jpg"
@@ -31,3 +31,4 @@ while True:
         break
 
 env.fin()
+

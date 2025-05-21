@@ -5,8 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 from AC_models import Actor, Critica
 import torch.nn.functional as F
-from agent import Entorno       #Real environment
-#from agent_s import Entorno      #Simulation environment
+#from agent import Entorno       #Real environment
+from agent_s import Entorno      #Simulation environment
 from CNN1_inf import CNN1_inf as CNN1
 from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
@@ -45,14 +45,14 @@ recompensa_global = 0
 
 # Load the model if it exists
 try:
-  Predi_actor.load_state_dict(torch.load('weights.pth', weights_only=True))
+  Predi_actor.load_state_dict(torch.load('weights_s.pth', weights_only=True))
   print("Model loaded successfully.")
 except FileNotFoundError:   
   print("Model not found.")
   
 # Load the buffer if it exists
 try:
-  Buff = ReplayBuffer.load(buffer_size)
+  Buff = ReplayBuffer.loads(buffer_size)
   print("Buffer successfully.")
 except FileNotFoundError:   
   Buff = ReplayBuffer(buffer_size)
@@ -166,7 +166,11 @@ for episode in range(num_episodes):
                     llA += 0.1
                 else:
                     llA -= 0.1
-
+                
+                if llA > 1:
+                    llA = 1
+                elif llA < 0:
+                    llA = 0
 
                 opt_critico1.zero_grad()
                 loss.backward()
@@ -177,8 +181,8 @@ for episode in range(num_episodes):
 
             
         print('Step: ', step)
-        
+       
     print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
-    torch.save(Predi_actor.state_dict(), 'weights.pth')
+    torch.save(Predi_actor.state_dict(), 'weights_s.pth')
 env.fin()

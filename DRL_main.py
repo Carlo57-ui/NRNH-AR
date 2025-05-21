@@ -12,7 +12,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 5
+num_episodes = 100
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -196,7 +196,7 @@ for episode in range(num_episodes):
     reward = reward + r
     print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', reward)
     # Save the weights after each episode
-    torch.save(Predi_actor.state_dict(), 'weights.pth')
+    torch.save(Predi_actor.state_dict(), 'weights_s.pth')
 
     if terminated:
         break

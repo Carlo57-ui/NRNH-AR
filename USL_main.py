@@ -5,14 +5,14 @@ import torch.nn as nn
 import torch.optim as optim
 from AC_models import Actor, Critica
 import torch.nn.functional as F
-from agent import Entorno       #Real environment
-#from agent_s import Entorno      #Simulation environment
+#from agent import Entorno       #Real environment
+from agent_s import Entorno      #Simulation environment
 from CNN1_inf import CNN1_inf as CNN1
 from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 97
+num_episodes = 590
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -20,7 +20,7 @@ tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
-llA = 0.9999                       # Learning Level A
+llA = 1                       # Learning Level A
 
 
 input_size = 1
@@ -49,7 +49,7 @@ recompensa_global = 0
 
 # Load the model if it exists
 try:
-  Predi_actor.load_state_dict(torch.load('weights.pth', weights_only=True))
+  Predi_actor.load_state_dict(torch.load('weights_s.pth', weights_only=True))
   print("Model loaded successfully.")
 except FileNotFoundError:   
   print("Model not found.")
@@ -147,6 +147,7 @@ for episode in range(num_episodes):
                     next_state = next_state.predicted_class                     # It can be 1-4
                     print("Next_state: ",next_state)
 
+            Cc = Cc.item()
             Buff.append((Cc,ar_t2,next_state))
             Buff.save()
 
@@ -167,7 +168,7 @@ for episode in range(num_episodes):
                 loss = F.mse_loss(val_qr.float(), gamma * val_qp.float())
 
                 llA = 1 - loss
-
+                llA = llA.item()
 
                 opt_critico1.zero_grad()
                 loss.backward()
@@ -182,5 +183,5 @@ for episode in range(num_episodes):
 
     print('Episodio:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
-    torch.save(Predi_actor.state_dict(), 'weights.pth')
+    torch.save(Predi_actor.state_dict(), 'weights_s.pth')
 env.fin()
