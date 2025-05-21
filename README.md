@@ -1,4 +1,7 @@
 INSTRUCTIONS FOR USING THE NRNH-AR ALGORITHM
+[![Captura-de-pantalla-2025-05-20-192920.jpg](https://i.postimg.cc/tRscHkTN/Captura-de-pantalla-2025-05-20-192920.jpg)](https://postimg.cc/G91KFkv4)
+
+[![Imagen-de-Whats-App-2025-05-20-a-las-19-33-39-de24b800.jpg](https://i.postimg.cc/8Pht10VM/Imagen-de-Whats-App-2025-05-20-a-las-19-33-39-de24b800.jpg)](https://postimg.cc/7fZg9XhZ)
 
 1. Make the connections shown in the image "conexion.jpg"
 
