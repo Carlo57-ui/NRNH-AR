@@ -5,7 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 from AC_models import Actor, Critica
 import torch.nn.functional as F
-from agent import Entorno
+from agent import Entorno       #Real environment
+#from agent_s import Entorno      #Simulation environment
 from CNN1_inf import CNN1_inf as CNN1
 from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
