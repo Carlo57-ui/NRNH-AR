@@ -123,7 +123,13 @@ class Entorno():
             print("Back")
         next_state = self.reset()        # Cc~ con el sensor o bien las fotos concatenadas
         
-        return next_state  
+        return next_state
+
+    def fin(self):
+        # Reinicia el entorno
+        sim.simxStopSimulation(clientID,sim.simx_opmode_oneshot_wait) 
+        sim.simxStartSimulation(clientID,sim.simx_opmode_oneshot_wait)
+        
 
 
 

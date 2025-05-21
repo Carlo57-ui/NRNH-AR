@@ -201,4 +201,4 @@ for episode in range(num_episodes):
     if terminated:
         break
 
-#env.fin()    #Activate when use Real environment
+env.fin()    #Activate when use Real environment
