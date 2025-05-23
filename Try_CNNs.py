@@ -4,36 +4,36 @@
 from CNN1_inf import CNN1_inf_s as CNN1_s
 from CNN2_inf import CNN2_inf_s as CNN2_s
 
-#from agent import Entorno
+from agent_s import Entorno
 
-#env = Entorno()
+env = Entorno()
 
 '''With data pictures'''
 
-#case = CNN1_s('./Data CNN1_s/No target/10.jpg')
+#case = CNN1_s('./Data CNN1_s/Target/10.jpg')
 #case = case.predicted_class
 
-case2 = CNN2_s('./Data CNN2_s/111/1.jpg')
-case2 = case2.predicted_class
+#case2 = CNN2_s('./Data CNN2_s/111/1.jpg')
+#case2 = case2.predicted_class
 
 #print("CASE CNN1", case)
-print("CASE CNN2", case2)
+#print("CASE CNN2", case2)
 
 
 '''With robot'''
-#img = env.take_picture()
+img = env.take_picture()
 
-#o1 = CNN1("1.jpg")
-#o2 = CNN1("2.jpg")
-#o3 = CNN1("3.jpg")
+o1 = CNN1_s("1.jpg")
+o2 = CNN1_s("2.jpg")
+o3 = CNN1_s("3.jpg")
         
-#o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
-#o2 = o2.predicted_class      #It can be 1 or 0                  
-#o3 = o3.predicted_class      #It can be 1 or 0  
+o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+o2 = o2.predicted_class      #It can be 1 or 0                  
+o3 = o3.predicted_class      #It can be 1 or 0  
 
-#print("o1", o1)
-#print("o2", o2)
-#print("o3", o3)
+print("o1", o1)
+print("o2", o2)
+print("o3", o3)
 
 #img_Cc = env.concat()                   #3 images concatenated
             

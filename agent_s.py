@@ -33,11 +33,11 @@ class Entorno():
         
         self.retCode,self.estado, self.coordenadas, self.objeto, self.vector=sim.simxReadProximitySensor(clientID,self.sensor,sim.simx_opmode_streaming)
         if self.estado == False:                     #Always put b 
-            print("No obstacle")
+            #print("No obstacle")
             self.state = 0
         
         elif self.estado == True:  
-            print("Obstacle")
+            #print("Obstacle")
             self.state = 1
         return self.state
 

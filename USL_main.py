@@ -20,7 +20,7 @@ tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
-llA = 1                       # Learning Level A
+llA = 0.9961                       # Learning Level A
 
 
 input_size = 1

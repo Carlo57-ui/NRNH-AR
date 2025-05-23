@@ -20,7 +20,7 @@ tau = 0.1                     # Smoothing factor
 policy_delay = 2              # Delay in policy update
 batch_size = 1
 buffer_size = 10000
-llA = 0.973                    # Learning Level A
+llA = 0.999                    # Learning Level A
 dis_t = 0.1                    # Discount time of reward
 reward = 0
 
@@ -47,7 +47,7 @@ opt_critico1 = optim.Adam(Predi_critic1.parameters(), lr=learning_rate)
 
 # Load the model if it exists
 try:
-  Predi_actor.load_state_dict(torch.load('weights.pth', weights_only=True))
+  Predi_actor.load_state_dict(torch.load('weights_s.pth', weights_only=True))
   print("Model loaded successfully.")
 except FileNotFoundError:   
   print("Model not found.")
@@ -177,9 +177,15 @@ for episode in range(num_episodes):
 
             r = r1 + r2 - dis_t * step
             
-            loss = F.mse_loss(val_qr.float(), (r + gamma * val_qp.float()))
-            llA = 1 - loss
+            loss = F.mse_loss(val_qp.float(), (r1 + gamma * val_qr.float()))
+            print("loss: ", loss)
+            llA = loss
+            llA = llA.item()
 
+            if llA > 1:
+                llA = 1
+            elif llA < 0:
+                llA = 0
 
             opt_critico1.zero_grad()
             loss.backward()
@@ -197,7 +203,7 @@ for episode in range(num_episodes):
     print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', reward)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights_s.pth')
-
+    reward = 0
     if terminated:
         break
 
