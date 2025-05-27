@@ -74,7 +74,7 @@ for episode in range(num_episodes):
     
     while state == 0:
         action = random.randint(1,4)                # random action (1:go, 2:turn left, 3:turn right, 4:stop)
-        new_state, reward, terminated, truncated, info = env.step(action)
+        state, reward, next_state, terminated = env.step(action)
         #print("State: ", state)
         #print("Action: ", action)
         if terminated:
@@ -95,7 +95,7 @@ for episode in range(num_episodes):
         qp = Predi_critic1.forward(Cc_b_t, ap_t)            # Predicted Q
         ar_t2 = ar_t + 1
         #print("Real a", ar_t2)
-        new_state, reward, terminated, truncated, info = env.step(ar_t2)              # Do the action          
+        state, reward, next_state, terminated = env.step(ar_t2)              # Do the action          
         
         Cc = Cc_b_t.item()
         Buff.append((Cc,ar_t2,next_state))
