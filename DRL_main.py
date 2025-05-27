@@ -8,6 +8,8 @@ import torch.nn.functional as F
 #from agent import Entorno       #Real environment
 from agent_s import Entorno      #Simulation environment
 from Buffer import ReplayBuffer
+import gymnasium as gym
+
 
 # Parameters
 num_episodes = 100
@@ -45,7 +47,7 @@ opt_critico1 = optim.Adam(Predi_critic1.parameters(), lr=learning_rate)
 
 # Load the model if it exists
 try:
-  Predi_actor.load_state_dict(torch.load('weights_s.pth', weights_only=True))
+  Predi_actor.load_state_dict(torch.load('weightss.pth', weights_only=True))
   print("Model loaded successfully.")
 except FileNotFoundError:   
   print("Model not found.")
@@ -61,7 +63,8 @@ except FileNotFoundError:
 
 
 # Create an object of the Environment class
-env = Entorno()
+#env = Entorno()
+env = gym.make("Acrobot-v1")
 terminated = False
 inicio = time.time()
 
@@ -71,7 +74,7 @@ for episode in range(num_episodes):
     
     while state == 0:
         action = random.randint(1,4)                # random action (1:go, 2:turn left, 3:turn right, 4:stop)
-        state, reward, next_state, terminated = env.step(action)
+        new_state, reward, terminated, truncated, info = env.step(action)
         #print("State: ", state)
         #print("Action: ", action)
         if terminated:
@@ -92,7 +95,7 @@ for episode in range(num_episodes):
         qp = Predi_critic1.forward(Cc_b_t, ap_t)            # Predicted Q
         ar_t2 = ar_t + 1
         #print("Real a", ar_t2)
-        state, reward, next_state, terminated = env.step(ar_t2)              # Do the action          
+        new_state, reward, terminated, truncated, info = env.step(ar_t2)              # Do the action          
         
         Cc = Cc_b_t.item()
         Buff.append((Cc,ar_t2,next_state))
@@ -135,7 +138,7 @@ for episode in range(num_episodes):
         ep_rew = ep_rew + reward
     print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', ep_rew)
     # Save the weights after each episode
-    torch.save(Predi_actor.state_dict(), 'weights_s.pth')
+    torch.save(Predi_actor.state_dict(), 'weightss.pth')
     
     if terminated:
         fin = time.time()
