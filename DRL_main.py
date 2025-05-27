@@ -63,8 +63,7 @@ except FileNotFoundError:
 
 
 # Create an object of the Environment class
-#env = Entorno()
-env = gym.make("Acrobot-v1")
+env = Entorno()
 terminated = False
 inicio = time.time()
 
