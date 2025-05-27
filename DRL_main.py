@@ -7,8 +7,6 @@ from AC_models import Actor, Critica
 import torch.nn.functional as F
 #from agent import Entorno       #Real environment
 from agent_s import Entorno      #Simulation environment
-from CNN1_inf import CNN1_inf as CNN1
-from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
@@ -23,7 +21,7 @@ buffer_size = 10000
 llA = 0.999                    # Learning Level A
 dis_t = 0.1                    # Discount time of reward
 reward = 0
-
+ep_rew = 0
 input_size = 1
 output_size = 2
 
@@ -65,6 +63,7 @@ except FileNotFoundError:
 # Create an object of the Environment class
 env = Entorno()
 terminated = False
+inicio = time.time()
 
 # Bucle de entrenamiento
 for episode in range(num_episodes):
@@ -72,95 +71,34 @@ for episode in range(num_episodes):
     
     while state == 0:
         action = random.randint(1,4)                # random action (1:go, 2:turn left, 3:turn right, 4:stop)
-        env.step(action)
-        state = env.reset()
-        print("State: ", state)
-        print("Action: ", action)
-        time.sleep(1)
-
-    env.step(4)                                 # stop
-    env.step(5)                                 # back
+        state, reward, next_state, terminated = env.step(action)
+        #print("State: ", state)
+        #print("Action: ", action)
+        if terminated:
+           break
+        state = next_state
 
     for step in range(max_number_of_steps):
+        Cc_b, ar_b, next_state_b = Buff.sample(batch_size, device)            # From buffer
+        next_stat_t = torch.Tensor([n.item() for n in next_state_b]).unsqueeze(1)
+        Cc_b_t = torch.Tensor([c.item() for c in Cc_b]).unsqueeze(1)
+
+        ap = Predi_actor.forward(Cc_b_t)             # Predicted action
+        ar = Real_actor.forward(next_stat_t)       # Real action with next_stat_t (C ̃_c)
+        ap_t = torch.argmax(ap).item()
+        ar_t = torch.argmax(ar).item()
+
+        qr = Real_critic1.forward(next_stat_t, ar_t)      # Real Q with next_stat_t (C ̃_c)
+        qp = Predi_critic1.forward(Cc_b_t, ap_t)            # Predicted Q
+        ar_t2 = ar_t + 1
+        #print("Real a", ar_t2)
+        state, reward, next_state, terminated = env.step(ar_t2)              # Do the action          
         
-        img = env.take_picture()
-
-        o1 = CNN1("1.jpg")
-        o2 = CNN1("2.jpg")
-        o3 = CNN1("3.jpg")
-        
-        o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
-        o2 = o2.predicted_class      #It can be 1 or 0                  
-        o3 = o3.predicted_class      #It can be 1 or 0                  
-           
-
-        if o1 == 1 or o2 == 1 or o3 == 1:                                
-            terminated = True                           # It has found the object
-            print("The objetive has been find")
-            r = 10                                       # reward if find the target
-
-            break
-        else:
-            img_Cc = env.concat()                   #3 images concatenated
-            
-            Cc = CNN2("cat.jpg")                       # concatenated image in CNN2
-            Cc = Cc.predicted_class                    # It can be 1-4
-            Cc_t = torch.Tensor([Cc]).unsqueeze(1)     # Agrega una nueva dimensión en la posición 1
-
-            Cc_b, ar_b, next_state_b = Buff.sample(batch_size, device)            # From buffer
-            next_stat_t = torch.Tensor([n.item() for n in next_state_b]).unsqueeze(1)
-
-            ap = Predi_actor.forward(Cc_t)             # Predicted action
-            ar = Real_actor.forward(next_stat_t)       # Real action with next_stat_t (C ̃_c)
-            ap_t = torch.argmax(ap).item()
-            ar_t = torch.argmax(ar).item()
-
-            qr = Real_critic1.forward(next_stat_t, ar_t)      # Real Q with next_stat_t (C ̃_c)
-            qp = Predi_critic1.forward(Cc_t, ap_t)            # Predicted Q
-
-            ar_t2 = ar_t + 1
-            r1 = -1                      # state reward
-            env.step(ar_t2)              # Do the action
-            next_state = env.reset()     # Ultrasonic sensor signal (0,1)
-
-            #print("Real action: ", ar_t2)
-            time.sleep(1)  #Time to do the action
-
-            if next_state == 0:
-                next_state = 0
-                r2 = 5                   # next_state reward
-                r= r1 + r2
-                break
-            else:
-                env.step(4)
-                env.step(5) 
-
-                img = env.take_picture()
-                o1 = CNN1("1.jpg")
-                o2 = CNN1("2.jpg")
-                o3 = CNN1("3.jpg")
-                
-                o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
-                o2 = o2.predicted_class      #It can be 1 or 0                  
-                o3 = o3.predicted_class      #It can be 1 or 0                  
-                                
-
-                if o1 == 1 or o2 == 1 or o3 == 1:
-                    next_state = 0           #It can be 1 or 0 (target or no target)
-                    terminated = True                           # It has found the object
-                    print("The objective has been find")
-                    r2 = 3                   # next_state reward
-                    r = r1 + r2 - step * dis_t
-                    break
-                else:
-                    img_Cc = env.concat()                   #3 images concatenated
-                    next_state = CNN2("cat.jpg")                       # concatenated image in CNN2
-                    next_state = next_state.predicted_class                     # It can be 1-4
-                    print("Next_state: ",next_state)
-                    r2 = -1                 # next_state reward
-        
+        Cc = Cc_b_t.item()
         Buff.append((Cc,ar_t2,next_state))
         Buff.save()
+        if terminated:
+           break
 
         if Buff.size() >= batch_size:
             Cc, ar, next_stat = Buff.sample(batch_size, device)
@@ -174,11 +112,8 @@ for episode in range(num_episodes):
             val_qr = Real_critic1.forward(next_stat_t, ar_t).detach().max(1)[0]
             val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
             val_qr.requires_grad_(True)
-
-            r = r1 + r2 - dis_t * step
             
-            loss = F.mse_loss(val_qp.float(), (r1 + gamma * val_qr.float()))
-            print("loss: ", loss)
+            loss = F.mse_loss(val_qp.float(), (reward + gamma * val_qr.float()))
             llA = loss
             llA = llA.item()
 
@@ -197,14 +132,15 @@ for episode in range(num_episodes):
                 param.data.copy_(tau * param_pred.data + (1 - tau) * param.data)
 
         print('Step: ', step,"Reward: ", reward)  
-        reward = reward + r
-
-    reward = reward + r
-    print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', reward)
+        ep_rew = ep_rew + reward
+    print('Episodio:', episode, 'Learning Level A: ', llA, 'Reward: ', ep_rew)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights_s.pth')
-    reward = 0
+    
     if terminated:
+        fin = time.time()
+        tiempo_total = fin - inicio
+        print(f"Tiempo de ejecución: {tiempo_total:.4f} segundos")
         break
 
 env.fin()    #Activate when use Real environment

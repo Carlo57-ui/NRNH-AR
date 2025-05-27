@@ -6,6 +6,8 @@ import random as ra
 from timeit import default_timer
 import cv2                      
 import matplotlib.pyplot as plt 
+from CNN1_inf import CNN1_inf_s as CNN1
+from CNN2_inf import CNN2_inf_s as CNN2
 
 #Agregar en coppelia simRemoteApi.start(19999)
 def connect(port):
@@ -27,6 +29,7 @@ class Entorno():
         self.retCode4, self.m1=sim.simxGetObjectHandle(clientID,'motor_joint',sim.simx_opmode_blocking)
         self.retCode, self.m2=sim.simxGetObjectHandle(clientID,'steer_joint',sim.simx_opmode_blocking)
         self.v = 3 #Velocidad de motores
+       
 
     
     def reset(self):
@@ -80,55 +83,99 @@ class Entorno():
         z = 3
         img_guardada_ent1 = cv2.imwrite('E:/Doctorado/Investigacion/Jetson/RedesNeuronales/NRNH-AR/%d.jpg'%3, imagen3)
 
+    def target(self):
+        retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
+        retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
+        img = self.take_picture()
+
+        o1 = CNN1("1.jpg")
+        o2 = CNN1("2.jpg")
+        o3 = CNN1("3.jpg")
+        
+        o1 = o1.predicted_class      #It can be 1 or 0 (target or no target)
+        o2 = o2.predicted_class      #It can be 1 or 0                  
+        o3 = o3.predicted_class      #It can be 1 or 0 
+        
+        reward = 0
+        if o1 == 1 or o2 == 1 or o3 == 1:                                
+            terminated = True                           # It has found the object
+            state = 0
+            print("The objetive has been find")
+            reward = 10  
+        else:
+            terminated = False
+            self.concat()                   #3 images concatenated
+            state = CNN2("cat.jpg")                       # concatenated image in CNN2
+            state = state.predicted_class                    # It can be 1-4
+            reward = -1
+        
+        return state, reward, terminated
 
     def step(self,action):
-        #que realice la acción
-        if action == 1:                  # Go  (1:go, 2:turn left, 3:turn right, 4:stop)
-            retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, self.v, sim.simx_opmode_oneshot)
-            retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
-            print("go")
-            
-        elif action == 2:                # Turn left
-            for i in range(3):
-                retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, -self.v, sim.simx_opmode_oneshot)
-                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, -0.3, sim.simx_opmode_oneshot)
-                time.sleep(1)
+
+        state, reward, terminated = self.target()
+
+        if terminated:
+            next_state = 0
+        else:
+                
+            #que realice la acción
+            if action == 1:                  # Go  (1:go, 2:turn left, 3:turn right, 4:stop)
                 retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, self.v, sim.simx_opmode_oneshot)
-                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0.3, sim.simx_opmode_oneshot)
+                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
                 time.sleep(1)
-            retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
-            retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
-            print("TL")
-            
-        elif action == 3:                # Turn right
-            for i in range(3):
+                #print("go")
+                
+            elif action == 2:                # Turn left
+                for i in range(3):
+                    retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, -self.v, sim.simx_opmode_oneshot)
+                    retCode = sim.simxSetJointTargetPosition(clientID, self.m2, -0.3, sim.simx_opmode_oneshot)
+                    time.sleep(1)
+                    retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, self.v, sim.simx_opmode_oneshot)
+                    retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0.3, sim.simx_opmode_oneshot)
+                    time.sleep(1)
+                retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
+                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
+                #print("TL")
+                
+            elif action == 3:                # Turn right
+                for i in range(3):
+                    retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, -self.v, sim.simx_opmode_oneshot)
+                    retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0.3, sim.simx_opmode_oneshot)
+                    time.sleep(1)
+                    retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, self.v, sim.simx_opmode_oneshot)
+                    retCode = sim.simxSetJointTargetPosition(clientID, self.m2, -0.3, sim.simx_opmode_oneshot)
+                    time.sleep(1)
+                retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
+                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
+                #print("TR")
+                
+            elif action == 4:                # Stop   
+                retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
+                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
+                time.sleep(0.5)
+                #print("Stop")
+                
+            elif action == 5:                # Back  
                 retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, -self.v, sim.simx_opmode_oneshot)
-                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0.3, sim.simx_opmode_oneshot)
-                time.sleep(1)
-                retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, self.v, sim.simx_opmode_oneshot)
-                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, -0.3, sim.simx_opmode_oneshot)
-                time.sleep(1)
-            retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
-            retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
-            print("TR")
+                retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
+                time.sleep(0.5)
+                #print("Back")
+            next_state = self.reset()        # Cc~ con el sensor o bien las fotos concatenadas
             
-        elif action == 4:                # Stop   
-            retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, 0, sim.simx_opmode_oneshot)
-            retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
-            print("Stop")
-            
-        elif action == 5:                # Back  
-            retCode = sim.simxSetJointTargetVelocity(clientID, self.m1, -self.v, sim.simx_opmode_oneshot)
-            retCode = sim.simxSetJointTargetPosition(clientID, self.m2, 0, sim.simx_opmode_oneshot)
-            print("Back")
-        next_state = self.reset()        # Cc~ con el sensor o bien las fotos concatenadas
+            if next_state == 0:
+                    next_state = 0
+                    reward = reward + 5                   # next_state reward
+            else:
+                next_state, next_reward, terminated = self.target()
+                reward = reward + next_reward
+                
         
-        return next_state
+        return state, reward, next_state, terminated
 
     def fin(self):
         # Reinicia el entorno
         sim.simxStartSimulation(clientID,sim.simx_opmode_oneshot_wait)
         sim.simxStopSimulation(clientID,sim.simx_opmode_oneshot_wait)
         
-env = Entorno()
-env.take_picture()        
+      
