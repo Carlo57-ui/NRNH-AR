@@ -2,69 +2,69 @@ import torch
 import torchvision.transforms as transforms
 import os
 from PIL import Image
-from CNN_model import CNN  # Importa el modelo desde CNN1_model.py
+from CNN_model import CNN  # Import the model from CNN1_model.py
 
-# Define el dispositivo a utilizar (CPU o GPU)
+# Defines the device to use (CPU or GPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 categories = 2
 
-# Define las transformaciones de datos
+# Defines data transformations
 transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),  # Convierte a escala de grises
+    transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
     transforms.Resize((150, 150)),                # Redimensiona a 150x150
-    transforms.ToTensor(),                        # Convierte a tensor
+    transforms.ToTensor(),                        # Convert to tensor
     transforms.Normalize((0.5,), (0.5,))          # Normaliza para escala de grises
 ])
 
-# Carga el modelo y los pesos entrenados
+# Load the model and trained weights
 model = CNN(categories).to(device)
 model.load_state_dict(torch.load("cnn1.pth"))
-model.eval()  # Pon el modelo en modo de evaluación
+model.eval()  # Put the model in evaluation mode
 
 model_s = CNN(categories).to(device)
 model_s.load_state_dict(torch.load("cnn1_s.pth"))
-model_s.eval()  # Pon el modelo en modo de evaluación
+model_s.eval()  # Put the model in evaluation mode
 
 class CNN1_inf:
     def __init__(self, path):
-        # Realiza predicciones sobre nuevas imágenes
+        # Make predictions about new images
         with torch.no_grad():
             image_path = os.path.abspath(path)
             image = Image.open(image_path)
             
-            # Aplica las transformaciones a la imagen
+            # Apply the transformations to the image
             image = transform(image)
-            # Convierte la imagen a un tensor y mueve al dispositivo
+            # Converts the image to a tensor and moves it to the device
             image = image.unsqueeze(0).to(device)
-            # Realiza la predicción
+            # Make the prediction
             output = model(image)
-            # Obtiene la clase predicha
+            # Gets the predicted class
             _, predicted_class = torch.max(output.data, 1)
-            # Define los nombres de las clases
+            # Defines the names of the classes
             class_names = [0, 1]  #0: No target 1: Target
-            # Obtiene el nombre de la clase
+            # Gets the name of the class
             self.predicted_class = class_names[predicted_class.item()]
-            # Imprime la clase predicha
+            # Print the predicted class
             #print(f'Predicted class: {self.predicted_class}')
 
 class CNN1_inf_s:
     def __init__(self, path):
-        # Realiza predicciones sobre nuevas imágenes
+        # Make predictions about new images
         with torch.no_grad():
             image_path = os.path.abspath(path)
             image = Image.open(image_path)
             
-            # Aplica las transformaciones a la imagen
+            # Apply the transformations to the image
             image = transform(image)
-            # Convierte la imagen a un tensor y mueve al dispositivo
+            # Converts the image to a tensor and moves it to the device
             image = image.unsqueeze(0).to(device)
             # Realiza la predicción
             output = model_s(image)
-            # Obtiene la clase predicha
+            # Gets the predicted class
             _, predicted_class = torch.max(output.data, 1)
-            # Define los nombres de las clases
+            # Defines the names of the classes
             class_names = [0, 1]  #0: No target 1: Target
-            # Obtiene el nombre de la clase
+            # Gets the name of the class
             self.predicted_class = class_names[predicted_class.item()]
-            # Imprime la clase predicha
+            # Print the predicted class
             #print(f'Predicted class: {self.predicted_class}')

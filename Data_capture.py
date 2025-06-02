@@ -5,6 +5,7 @@ import time
 output_dir = "./Data CNN1_s/Target"
 
 '''
+#---------REAL ROBOT----------#
 # Initialize the camera
 camera = cv2.VideoCapture(0)
 
@@ -39,17 +40,16 @@ cv2.destroyAllWindows()'''
 
 #-------------------------------------------------------------------------------------------#
 
-'''Simulation'''
+#---------SIMULATION ROBOT-----------#
 import sim
 import numpy as np
 
 x = 0
-#Agregar en coppelia simRemoteApi.start(19999)
 def connect(port):
     sim.simxFinish(-1) 
     clientID=sim.simxStart('127.0.0.1',port,True,True,2000,5)
-    if clientID == 0: print("Conectado a", port)
-    else: print("No se pudo conectar")
+    if clientID == 0: print("Conected with", port)
+    else: print("Error conection")
     return clientID
 
 clientID = connect(19999)
@@ -57,9 +57,9 @@ clientID = connect(19999)
 
 
 while True:
-    #retCode, frame1 = sim.simxGetObjectHandle(clientID,'visionSensor1',sim.simx_opmode_blocking)
+    retCode, frame1 = sim.simxGetObjectHandle(clientID,'visionSensor1',sim.simx_opmode_blocking)
     retCode2, frame2 = sim.simxGetObjectHandle(clientID,'visionSensor2',sim.simx_opmode_blocking)
-    #retCode3, frame3 = sim.simxGetObjectHandle(clientID,'visionSensor3',sim.simx_opmode_blocking)
+    retCode3, frame3 = sim.simxGetObjectHandle(clientID,'visionSensor3',sim.simx_opmode_blocking)
     # Display the frame
     cv2.imshow("Press 'c' to capture", frame2)
 
@@ -82,17 +82,17 @@ while True:
         img3.resize([resolution3[1], resolution3[0],1])
 
 
-        img_vert1 = cv2.flip(img1,0)  #Voltea la imagen en vertical
+        img_vert1 = cv2.flip(img1,0)  
         imagen1 = img_vert1
         x += 1
         img_guardada_ent1 = cv2.imwrite(f"{output_dir}/{x}.jpg", imagen1)
 
-        img_vert2 = cv2.flip(img2,0)  #Voltea la imagen en vertical
+        img_vert2 = cv2.flip(img2,0)  
         imagen2 = img_vert2
         x += 1
         img_guardada_ent1 = cv2.imwrite(f"{output_dir}/{x}.jpg", imagen2)
 
-        img_vert3 = cv2.flip(img3,0)  #Voltea la imagen en vertical
+        img_vert3 = cv2.flip(img3,0)  
         imagen3 = img_vert3
         x += 1
         img_guardada_ent1 = cv2.imwrite(f"{output_dir}/{x}.jpg", imagen3)

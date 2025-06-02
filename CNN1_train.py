@@ -7,52 +7,52 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
-from CNN_model import CNN                        # Importa el modelo desde CNN_model.py
+from CNN_model import CNN                        # Import the model from CNN_model.py
 
 categories = 2
-# Define el dispositivo a utilizar (CPU o GPU)
+# Defines the device to use (CPU or GPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Define las transformaciones de los datos
+# Defines data transformations
 transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),  # Convierte a escala de grises
-    transforms.Resize((150, 150)),                # Redimensiona a 150x150
-    transforms.ToTensor(),                        # Convierte a tensor
-    transforms.Normalize((0.5,), (0.5,))          # Normaliza para escala de grises
+    transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
+    transforms.Resize((150, 150)),                # Resize to 150x150
+    transforms.ToTensor(),                        # Convert to tensor
+    transforms.Normalize((0.5,), (0.5,))          # Normalizes to grayscale
 ])
 
-# Carga los datos de entrenamiento
+# Load training data
 train_dataset = ImageFolder("./Data CNN1_s", transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-# Crea la instancia del modelo y la mueve al dispositivo
+# Creates the model instance and moves it to the device
 model = CNN(categories).to(device)
 
-# Define la función de pérdida y el optimizador
+# Define the loss function and the optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# Entrenamiento del modelo
+# Model training
 epochs = 30
 for epoch in range(epochs):
     for i, (images, labels) in enumerate(train_loader):
         images = images.to(device)
         labels = labels.to(device)
         
-        # Calcula la salida del modelo
+        # Calculate the output of the model
         outputs = model(images)
 
-        # Calcula la pérdida
+        # Calculate the loss
         loss = criterion(outputs, labels)
 
-        # Actualiza los pesos del modelo
+        # Updates the model weights
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        # Imprime el progreso del entrenamiento
+        # Print training progress
         if (i + 1) % 100 == 0:
             print(f'Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
 
-# Guarda los pesos del modelo
+# Saves the model weights
 torch.save(model.state_dict(), "cnn1_s.pth")

@@ -12,7 +12,7 @@ from CNN2_inf import CNN2_inf as CNN2
 from Buffer import ReplayBuffer
 
 # Parameters
-num_episodes = 590
+num_episodes = 5
 max_number_of_steps = 30
 gamma = 0.9                   # Discount factor
 learning_rate = 0.001         # Learning rate
@@ -65,7 +65,7 @@ except FileNotFoundError:
 env = Entorno()
 inicio = time.time()
 
-# Bucle de entrenamiento
+# Training loop
 for episode in range(num_episodes):
     state = env.reset()                             # Ultrasonic sensor signal (0,1)
     
@@ -79,7 +79,7 @@ for episode in range(num_episodes):
         state = next_state
 
     for step in range(max_number_of_steps):
-        Cc_t = torch.Tensor([state]).unsqueeze(1)     # Agrega una nueva dimensión en la posición 1
+        Cc_t = torch.Tensor([state]).unsqueeze(1)     # Add a new dimension at position 1
 
         Cc, ar, next_stat = Buff.sample(batch_size, device)            # From buffer
         next_stat_t = torch.Tensor([n.item() for n in next_stat]).unsqueeze(1)
@@ -104,15 +104,15 @@ for episode in range(num_episodes):
 
         if Buff.size() >= batch_size:
             Cc, ar, next_stat = Buff.sample(batch_size, device)
-            Cc_t = torch.Tensor([c.item() for c in Cc]).unsqueeze(1)  # Convierte cada elemento de Cc a escalar
-            ar_t = torch.Tensor([a.item() for a in ar]).unsqueeze(1)  # Convierte cada elemento de ar a escalar
+            Cc_t = torch.Tensor([c.item() for c in Cc]).unsqueeze(1)  # Convert each element of Cc to scalar
+            ar_t = torch.Tensor([a.item() for a in ar]).unsqueeze(1)  # Convert each element of ar to scalar
 
             ap = Predi_actor.forward(Cc_t)                 # Predicted action
             ap_t = torch.argmax(ap).item()
  
             val_qp = Predi_critic1.forward(Cc_t, ap_t).detach().max(1)[0]
             val_qr = Real_critic1.forward(next_stat_t, ar_t).detach().max(1)[0]
-            val_qp.requires_grad_(True)  # Habilita el cálculo de gradiente para val_qp
+            val_qp.requires_grad_(True)  # Enables gradient calculation for val_qp
             val_qr.requires_grad_(True)
 
             loss = F.mse_loss(val_qr.float(), gamma * val_qp.float())
@@ -131,12 +131,12 @@ for episode in range(num_episodes):
 
         print('Step: ', step)
 
-    print('Episodio:', episode, 'Learning Level A: ', llA)
+    print('Episode:', episode, 'Learning Level A: ', llA)
     # Save the weights after each episode
     torch.save(Predi_actor.state_dict(), 'weights.pth')
     if terminated:
         fin = time.time()
         tiempo_total = fin - inicio
-        print(f"Tiempo de ejecución: {tiempo_total:.4f} segundos")
+        print(f"Execution time: {tiempo_total:.4f} seconds")
         break
 env.fin()
