@@ -165,10 +165,10 @@ class Entorno():
             
             if next_state == 0:
                     next_state = 0
-                    reward = reward + 5                   # next_state reward
+                    reward = -0.1                   # next_state reward
             else:
                 next_state, next_reward, terminated = self.target()
-                reward = reward + next_reward
+                reward = next_reward   # Reward of step
                 
         
         return state, reward, next_state, terminated
